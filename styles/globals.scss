@@ -14,8 +14,8 @@
   margin: 0;
 }
 
+// svg is left inline: lucide icons sit inside text runs (DESIGN.md §5).
 img,
-svg,
 video {
   display: block;
   max-width: 100%;
