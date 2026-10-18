@@ -65,7 +65,8 @@ Data flow: `data/raw` → `lib/normalize` → normalized `Shipment[]` → `lib/a
 - Milestones differ by mode. Sea: gate-in, loaded, departed, arrived, discharged.
   Road: picked-up, in-transit, delivered. Shipments leaving the EU (e.g. to the UK) add customs milestones.
 - `ShipmentStatus` (normalized, shown in UI): `planned`, `in_transit`, `at_port`,
-  `customs_hold`, `delivered`, `exception`. Lateness is `etaStatus`, not a status. The operator's original text is kept
+  `customs_hold`, `delivered`. Lateness is `etaStatus`, not a status, and problems
+  (incident, stale…) are exceptions in the ops inbox, not a status. The operator's original text is kept
   in `rawStatus` for traceability.
 - `source` (where a value comes from) ≠ `etaStatus` (`on_time` | `at_risk` | `late`, is it
   going to make it?). Never mix the two.
@@ -102,6 +103,8 @@ alerts reach customers only with High confidence (≥ 0.8), otherwise they becom
 ## Conventions
 - Functional components, named exports, props typed with `type`.
 - Server Components by default; add `"use client"` only where state or interactivity is needed.
+  Views that show shipment data are Client Components: they read the persona and shipments
+  from the Zustand store, which the server can't see (`docs/RATIONALE.md` §2).
 - Pure functions in `lib/` with no React imports, so they're easy to test.
 - Small files (< ~200 lines). Extract components when they grow.
 - No `any`. Domain types only from `lib/types.ts`.

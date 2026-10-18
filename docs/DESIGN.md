@@ -80,7 +80,7 @@ Never use color alone: every status also has an icon and a text label.
 Pill with icon + label. Two separate sets, never merged into one badge:
 - **`ShipmentStatus`** (where it is): `Planned` (calendar, neutral) · `In transit` (truck / ship
   by mode, info) · `At port` (anchor, info) · `Customs hold` (shield-alert, red) ·
-  `Delivered` (package-check, green) · `Exception` (octagon-alert, red).
+  `Delivered` (package-check, green). Problems such as incidents are exceptions, not a status.
 - **`EtaStatus`** (will it make it): `On time` (check-circle, green) · `At risk`
   (clock-alert, amber) · `Late` (alert-triangle, red).
 

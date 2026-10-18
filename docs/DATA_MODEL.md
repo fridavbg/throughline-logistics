@@ -62,13 +62,15 @@ never `new Date()` in logic.
 
 ```ts
 // ---------- Shared ----------
-export type DataSource = "confirmed" | "estimated" | "ai_predicted";
+export type OperatorSource = "confirmed" | "estimated";   // AI never writes operator data
+export type DataSource = OperatorSource | "ai_predicted";
 export type Mode = "road" | "sea";
 
 export type ShipmentStatus =
   | "planned" | "in_transit" | "at_port" | "customs_hold"
-  | "delivered" | "exception";
+  | "delivered";
 // Lateness is not a status: it lives in EtaStatus ("at_risk" | "late").
+// Problems (incident, stale…) are not a status either: they are ShipmentExceptions.
 
 export type EtaStatus = "on_time" | "at_risk" | "late";
 
@@ -98,7 +100,7 @@ export type Milestone = {
   type: MilestoneType;
   at: string | null;            // ISO; null = not happened yet
   plannedAt: string;            // ISO
-  source: DataSource;
+  source: OperatorSource;
   rawStatus?: string;           // operator's original text/code
 };
 
@@ -111,9 +113,9 @@ export type Leg = {
   milestones: Milestone[];      // sorted by plannedAt
 };
 
-export type Eta = {
+export type Eta = {               // the operator's ETA; AI predictions are EtaPrediction
   date: string;                 // ISO
-  source: DataSource;
+  source: OperatorSource;
 };
 
 export type DocumentType =
@@ -134,9 +136,8 @@ export type Shipment = {
   legs: Leg[];                  // sorted by sequence
   operatorEta: Eta;             // from the operator (confirmed | estimated)
   plannedEta: string;           // ISO, promised at booking
-  lastUpdateAt: string;         // ISO, latest operator update
   documents: ShipmentDocument[];
-  rawEvents: RawEventRef[];     // traceability for ops view
+  rawEvents: RawEventRef[];     // traceability for ops view; newest = last update
 };
 
 export type RawEventRef = {
@@ -191,7 +192,8 @@ export type CustomerAlert = {
 | Function | Returns | Rule |
 |---|---|---|
 | `getShipmentStatus(s)` | `ShipmentStatus` | Derived, never stored: from latest completed milestone; `customs_hold` wins |
-| `isStale(s, now)` | `boolean` | Status is `in_transit` or `at_port` and `now - lastUpdateAt > 24h` |
+| `getLastUpdateAt(s)` | `string \| null` | Newest `rawEvents[].receivedAt`; `null` when the operator hasn't reported yet. Computed, so a simulated event can't leave it behind |
+| `isStale(s, now)` | `boolean` | Status is `in_transit` or `at_port` and `now - getLastUpdateAt(s) > 24h` |
 | `getEtaStatus(s, prediction)` | `EtaStatus` | Best available ETA = `prediction.latest` if confidence ≥ 0.6, else `operatorEta`. Minus `plannedEta`: ≤ 0h `on_time`, ≤ 24h `at_risk`, > 24h `late` |
 | `isOverdue(e, now)` | `boolean` | `now > respondBy` |
 | `getCurrentLeg(s)` | `Leg` | First leg with an incomplete milestone |
@@ -236,6 +238,9 @@ Hi, the container is held by UK customs at Southampton pending the packing list.
 ## 7. Seed scenarios
 Every shipment exists to demonstrate something. Build SHP-1042 → SHP-1050 first (P0, covers
 every demo step); SHP-1051 → SHP-1055 are P2 and add variety.
+
+**Raw events:** every operator update on a seed shipment is a `rawEvents` entry, because the
+last update time is computed from them.
 
 **Timestamps:** define every seed time relative to `DEMO_NOW` with a small helper
 (e.g. `hoursAgo(31)`, `daysFromNow(2)`), not as hardcoded dates. Exception `detectedAt`
