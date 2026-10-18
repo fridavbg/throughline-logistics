@@ -31,7 +31,8 @@
       "Bash(gh issue comment:*)",
       "Bash(npm run lint)",
       "Bash(npm run build)",
-      "Bash(npm run test)"
+      "Bash(npm run test)",
+      "Bash(npm run typecheck)"
     ]
   }
 }

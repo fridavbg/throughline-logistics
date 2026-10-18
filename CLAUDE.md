@@ -136,7 +136,8 @@ alerts reach customers only with High confidence (≥ 0.8), otherwise they becom
 ## Workflow for Claude Code
 - Read `docs/PRD.md` and `docs/DATA_MODEL.md` before building a feature, and
   `docs/DESIGN.md` before building or styling UI.
-- Work in small steps; after each step run `npm run lint && npm run test && npm run build`.
+- Work in small steps; after each step run
+  `npm run lint && npm run typecheck && npm run test && npm run build`.
 - Explain non-obvious decisions in a short code comment or in the suggested commit message.
 - Build in priority order (`docs/PRD.md` §5): finish all P0 before starting P1 or P2.
 - Before adding scope, check `docs/PRD.md` → "Out of scope". Ask if unsure.
@@ -169,4 +170,5 @@ Allowed with `gh`:
 - `npm run dev`: local dev
 - `npm run build`: must pass before suggesting a commit
 - `npm run lint`
-- `npm run test`: Vitest unit tests for `lib/`
+- `npm run typecheck`: `tsc --noEmit`
+- `npm run test`: Vitest unit tests for `lib/` (`npm run test:watch` while coding)
