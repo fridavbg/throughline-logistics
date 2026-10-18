@@ -6,8 +6,9 @@
  */
 import { HIGH_CONFIDENCE, REVIEW_BELOW } from "@/lib/ai/confidence";
 import { predictEta } from "@/lib/ai/eta";
+import { messagesCustomer } from "@/lib/ai/draft";
 import { summarizeShipment } from "@/lib/ai/summarize";
-import { getEtaStatus, getFurthestStep, getLastUpdateAt, getShipmentStatus } from "@/lib/derived";
+import { getEtaStatus, getFurthestStep, getLastUpdateAt, getShipmentStatus, isOverdue } from "@/lib/derived";
 import { formatDayRange, HOUR_MS } from "@/lib/time";
 import type {
   CustomerAlert,
@@ -16,6 +17,7 @@ import type {
   EtaStatusWithSource,
   OperatorSource,
   Shipment,
+  ShipmentException,
   ShipmentStatus,
   ShipmentSummary,
 } from "@/lib/types";
@@ -135,4 +137,26 @@ function delayMessage(s: Shipment, p: EtaPrediction): string {
   const days = Math.round(hoursLate / 24);
   const howLate = hoursLate <= 24 ? "up to a day late" : days === 1 ? "about a day late" : `about ${days} days late`;
   return `${s.id} is likely to arrive ${howLate}: AI predicts ${formatDayRange(p.earliest, p.latest)}.`;
+}
+
+/**
+ * The factual acknowledgement a customer gets when ops misses the response target on an
+ * exception that needs a message to them, and the draft hasn't been approved (PRD §6). No
+ * commitments, no cause, no date: only that we know and are on it. Dated at the deadline.
+ */
+export function escalationAlerts(
+  exceptions: ShipmentException[],
+  approvedIds: ReadonlySet<string>,
+  now: Date,
+): CustomerAlert[] {
+  return exceptions
+    .filter((e) => messagesCustomer(e.suggestedAction) && isOverdue(e, now) && !approvedIds.has(e.id))
+    .map((e) => ({
+      id: `escalation-${e.id}`,
+      shipmentId: e.shipmentId,
+      severity: e.severity === "critical" ? "critical" : "warning",
+      message: `We're aware of an issue with ${e.shipmentId} and are working on it.`,
+      createdAt: e.respondBy,
+      source: "confirmed",
+    }));
 }

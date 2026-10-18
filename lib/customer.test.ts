@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { getShipments } from "@/data/shipments";
-import { users } from "@/data/seed";
+import { customers, users } from "@/data/seed";
+import { rankExceptions } from "@/lib/ai/triage";
 import { visibleShipments } from "@/lib/access";
-import { countByEta, customerAlerts, customerShipments } from "@/lib/customer";
+import { countByEta, customerAlerts, customerShipments, escalationAlerts } from "@/lib/customer";
 import { daysAgo, getNow } from "@/lib/time";
 import type { Shipment } from "@/lib/types";
 
@@ -89,5 +90,33 @@ describe("customerShipments: bad data", () => {
     const bad = all.map((s) => (s.id === "SHP-1048" ? { ...s, operatorEta: { ...s.operatorEta, date: "x" } } : s));
     const ids = (list: Shipment[]) => customerShipments(list, NOW).map((v) => v.shipment.id);
     expect(ids([...bad].reverse())).toEqual(ids(bad));
+  });
+});
+
+describe("escalationAlerts", () => {
+  const exceptions = rankExceptions(all, customers, NOW);
+
+  it("acknowledges an overdue customer-facing item that nobody approved, with no commitments", () => {
+    expect(escalationAlerts(exceptions, new Set(), NOW)).toEqual([
+      {
+        id: "escalation-SHP-1043-customs_hold",
+        shipmentId: "SHP-1043",
+        severity: "critical",
+        message: "We're aware of an issue with SHP-1043 and are working on it.",
+        createdAt: exceptions[0]?.respondBy,
+        source: "confirmed",
+      },
+    ]);
+  });
+
+  it("stays quiet once the draft is approved", () => {
+    expect(escalationAlerts(exceptions, new Set(["SHP-1043-customs_hold"]), NOW)).toEqual([]);
+  });
+
+  it("never acknowledges internal items, even overdue: the stale SHP-1045 an hour later", () => {
+    const later = new Date(NOW.getTime() + 60 * 60_000);
+    const ids = escalationAlerts(rankExceptions(all, customers, later), new Set(), later).map((a) => a.shipmentId);
+    expect(ids).not.toContain("SHP-1045");
+    expect(ids).toContain("SHP-1043");
   });
 });

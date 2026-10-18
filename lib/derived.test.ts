@@ -268,6 +268,8 @@ describe("isOverdue", () => {
     priorityScore: 0,
     priorityReason: "",
     suggestedAction: "contact_operator",
+    actionReason: "",
+    confidence: 0.95,
   });
 
   it("is not overdue exactly at the deadline", () => {

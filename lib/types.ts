@@ -279,6 +279,23 @@ export type ShipmentException = {
   /** Why it ranks where it does, shown to the ops user. */
   priorityReason: string;
   suggestedAction: NextAction;
+  /** Why that action, in plain words, e.g. "Customs needs the packing list". */
+  actionReason: string;
+  /** How sure the suggestion is, from 0 to 1: the AI prediction's for a predicted delay, else high. */
+  confidence: number;
+};
+
+/** An exception as detected, before triage has scored and explained its rank. */
+export type DetectedException = Omit<ShipmentException, "priorityScore" | "priorityReason">;
+
+/** A customer message the AI drafts for an ops user to edit and approve. Never sent automatically. */
+export type NotificationDraft = {
+  exceptionId: string;
+  shipmentId: string;
+  customerId: string;
+  subject: string;
+  /** Only facts from the shipment data; predictions worded as predictions. */
+  body: string;
 };
 
 /** A message shown to a customer about one of their shipments. */

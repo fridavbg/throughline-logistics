@@ -166,7 +166,10 @@ export function getEtaStatus(s: Shipment, prediction?: EtaPrediction): EtaStatus
   return { status, source: best.source };
 }
 
-/** Whether an exception's response deadline has passed. Exactly at the deadline is not overdue. */
-export function isOverdue(e: ShipmentException, now: Date): boolean {
+/**
+ * Whether an exception's response deadline has passed. Exactly at the deadline is not overdue.
+ * Takes only `respondBy`, so it works before triage has scored the exception too.
+ */
+export function isOverdue(e: Pick<ShipmentException, "respondBy">, now: Date): boolean {
   return now.getTime() > Date.parse(e.respondBy);
 }
