@@ -24,6 +24,23 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Views get shipments through the normalized model, never from operator payloads.
+  {
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/data/raw", "@/data/raw/*"],
+              message: "Components never read raw operator payloads: use the normalized shipments.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
