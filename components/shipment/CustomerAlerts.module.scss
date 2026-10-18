@@ -50,6 +50,12 @@
   min-width: 0;
 }
 
+// A message ops sent keeps its line breaks (greeting, paragraphs, sign-off).
+.message {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;
