@@ -19,6 +19,11 @@ customer automatically receives a factual acknowledgement with no commitments ("
 of an issue with SHP-1043 and are working on it."). The customer always hears something within
 the target, even when nobody has acted yet.
 
+An AI prediction decides whether a shipment shows as late from confidence 0.6, but a delay
+*alert* needs 0.8. A customer can therefore see "Late" in the portal before getting an alert,
+so the ETA status always carries its source: when it comes from the prediction, the badge says
+it's AI and shows the confidence.
+
 | Feature | Problem it addresses | In the prototype | In production |
 |---|---|---|---|
 | **Status normalization** | Every operator uses different formats and vocabularies; some updates arrive by email | Rule/keyword mapping per operator; email parsed with a fixed confidence | Structured feeds (API/EDI) mapped deterministically. Unstructured input (email, PDF) parsed by an LLM with structured output, validated against the schema; low confidence goes to a review queue |
