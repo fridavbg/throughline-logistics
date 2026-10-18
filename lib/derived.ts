@@ -3,6 +3,7 @@
  * update, staleness and lateness. Because they are computed every time, a simulated event
  * can never leave them out of date. Spec: docs/DATA_MODEL.md §5.
  */
+import { REVIEW_BELOW } from "@/lib/ai/confidence";
 import { legInProgress } from "@/lib/shipments";
 import { HOUR_MS } from "@/lib/time";
 import type {
@@ -15,9 +16,6 @@ import type {
   ShipmentException,
   ShipmentStatus,
 } from "@/lib/types";
-
-/** Below this confidence, an ETA prediction isn't trusted to decide lateness. */
-export const MIN_PREDICTION_CONFIDENCE = 0.6;
 
 /** With no operator update for longer than this, a moving shipment is stale. */
 export const STALE_AFTER_HOURS = 24;
@@ -142,14 +140,14 @@ export function isStale(s: Shipment, now: Date): boolean {
 
 /**
  * Whether the shipment will arrive when promised, and whose ETA says so. Uses the end of the
- * AI's predicted window when its confidence is at least 0.6, otherwise the operator's ETA.
- * Compared with the promised arrival: not after it is `on_time`, up to 24 hours after is
+ * AI's predicted window when its confidence is at least 0.6 (the same line below which the UI
+ * shows "Needs review"), otherwise the operator's ETA. Compared with the promised arrival: not after it is `on_time`, up to 24 hours after is
  * `at_risk`, more is `late`.
  *
  * The prediction is optional: without one, the operator's ETA decides.
  */
 export function getEtaStatus(s: Shipment, prediction?: EtaPrediction): EtaStatusWithSource {
-  const usePrediction = prediction !== undefined && prediction.confidence >= MIN_PREDICTION_CONFIDENCE;
+  const usePrediction = prediction !== undefined && prediction.confidence >= REVIEW_BELOW;
   const best = usePrediction
     ? { date: prediction.latest, source: prediction.source }
     : s.operatorEta;
