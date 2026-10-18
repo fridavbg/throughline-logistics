@@ -1,11 +1,11 @@
 /**
- * Client state for the demo: who is logged in. Simulated events join it with the demo
- * panel (F6). Spec: docs/RATIONALE.md §2.
+ * Client state for the demo: who is logged in, and what ops has done in the inbox. Simulated
+ * events join it with the demo panel (F6). Spec: docs/RATIONALE.md §2.
  */
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { users } from "@/data/seed";
-import type { User } from "@/lib/types";
+import type { CustomerAlert, User } from "@/lib/types";
 
 type DemoState = {
   /** The chosen persona's id, or null before anyone has picked one. */
@@ -16,11 +16,28 @@ type DemoState = {
    */
   hasHydrated: boolean;
   signIn: (userId: string) => void;
+  /** Exceptions ops has dealt with in any way (resolved, snoozed, operator contacted, message sent); hidden from the inbox. */
+  handledIds: string[];
+  /**
+   * The subset that settles it for the customer: resolved, or answered with an approved message.
+   * Only these stop the escalation acknowledgement; a snooze or a call to the operator doesn't
+   * tell the customer anything (PRD §6).
+   */
+  settledIds: string[];
+  /** Messages ops approved and sent to customers, newest first. */
+  sentAlerts: CustomerAlert[];
+  /** Hides an exception from the inbox for now (snooze, operator contacted). */
+  handle: (exceptionId: string) => void;
+  /** Hides an exception and marks it settled: the problem is gone. */
+  resolve: (exceptionId: string) => void;
+  /** Sends an approved message: the customer sees it, and its exception counts as handled. */
+  send: (exceptionId: string, alert: CustomerAlert) => void;
 };
 
 /**
  * The demo store. Only `userId` is saved, in sessionStorage: a reload or a pasted link keeps
- * the persona, and closing the tab resets the demo.
+ * the persona, and closing the tab resets the demo. What ops does in the inbox lives in memory
+ * only, so switching persona keeps it but a reload starts the demo over.
  */
 export const useDemoStore = create<DemoState>()(
   persist(
@@ -28,6 +45,21 @@ export const useDemoStore = create<DemoState>()(
       userId: null,
       hasHydrated: false,
       signIn: (userId) => set({ userId }),
+      handledIds: [],
+      settledIds: [],
+      sentAlerts: [],
+      handle: (exceptionId) => set((state) => ({ handledIds: [...state.handledIds, exceptionId] })),
+      resolve: (exceptionId) =>
+        set((state) => ({
+          handledIds: [...state.handledIds, exceptionId],
+          settledIds: [...state.settledIds, exceptionId],
+        })),
+      send: (exceptionId, alert) =>
+        set((state) => ({
+          handledIds: [...state.handledIds, exceptionId],
+          settledIds: [...state.settledIds, exceptionId],
+          sentAlerts: [alert, ...state.sentAlerts],
+        })),
     }),
     {
       name: "throughline-persona",
