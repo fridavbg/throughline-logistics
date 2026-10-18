@@ -1,0 +1,89 @@
+@use "@/styles/mixins" as *;
+
+.row {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+// The priority marker: the triage score, so the order is never a mystery.
+.score {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.25rem;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.title {
+  min-width: 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.ref {
+  font-family: var(--font-mono);
+}
+
+.route {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.muted,
+.normal {
+  color: var(--color-text-muted);
+}
+
+.soon {
+  color: var(--status-risk);
+  font-weight: var(--weight-medium);
+}
+
+.overdue {
+  color: var(--status-incident);
+  font-weight: var(--weight-semibold);
+}
+
+// AI output: a dashed violet edge, like other longer AI blocks (DESIGN §6).
+.suggestion {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+  padding-left: var(--space-3);
+  border-left: 2px dashed var(--ai-accent);
+}
+
+.action {
+  font-size: var(--text-sm);
+}
+
+// Stacked full width on a phone, a row from sm.
+.buttons {
+  display: grid;
+  gap: var(--space-2);
+
+  @include bp(sm) {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
