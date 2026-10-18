@@ -15,9 +15,9 @@ export type RoleGateProps = {
 };
 
 /**
- * Shows the page only to a persona with the right role (or any persona, without `role`). With no
- * persona it goes to the picker; with another role it goes to that role's own home. Until the saved persona has
- * been read back, it shows a skeleton instead of redirecting too early.
+ * Shows the page only to a persona with the right role (or any persona, without `role`). With
+ * no persona it goes to the picker; with another role it goes to that role's own home. Until
+ * the saved persona has been read back, it shows a skeleton instead of redirecting too early.
  */
 export function RoleGate({ role, children }: RoleGateProps) {
   const router = useRouter();
