@@ -51,6 +51,10 @@ inventing information. It's the first candidate for a next step.
   can't see either: both live only in the browser, so a server render couldn't filter by role
   or show a simulated event. Static parts (layout, headings) stay Server Components. In
   production, data and access control move to the server (see below).
+- The chosen persona is saved in sessionStorage (Zustand `persist`, only the persona id), so a
+  reload or a pasted link keeps it and closing the tab resets the demo. The server can't read
+  it, so the store is read back after the first render (`skipHydration`) and role pages show a
+  skeleton until then, instead of a hydration mismatch or an early redirect to the picker.
 
 **Production (proposed)**
 - **Ingestion:** operator APIs and webhooks, EDI, inbound email, and optionally a carrier
