@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Throughline — Shipment Tracking Prototype
 
-## Getting Started
+One view of every shipment across sites, logistics operators and transport modes,
+with AI that predicts delays, ranks what needs attention and drafts the follow-up.
 
-First, run the development server:
+**Live demo:** https://throughline-logistics.vercel.app
 
+> Frontend-only prototype. All data, operators and AI output are synthetic.
+
+## Demo walkthrough (≈ 3 min)
+1. Sign in as **Rick (Ops, all sites)** → the attention inbox ranks a customs hold first.
+2. Open it → the timeline shows each leg, the customs step and the original operator messages.
+3. **Notify customer** → review the AI draft → approve.
+4. Open **Demo** (bottom right) → *Vessel delayed at Valencia* → a new exception appears.
+5. Switch to **Morty (Ops, Terrassa)** → only Terrassa shipments are visible.
+6. Switch to **Summer (Customer, Ostrel Deutschland)** → the delay alert and AI-predicted ETA.
+
+## Run locally
 ```bash
+nvm use
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check |
+| `npm run test` | Unit tests (Vitest) |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
+```
+app/         routes: role picker, ops, customer, shipment detail
+components/  UI, shipment, AI and layout components
+data/        synthetic seed data and raw operator payloads
+lib/         types, normalizers, access rules, mock AI
+styles/      design tokens and global styles
+docs/        product, data model, design and rationale
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Docs
+- [Product requirements](docs/PRD.md)
+- [Data model](docs/DATA_MODEL.md)
+- [Design](docs/DESIGN.md)
+- [Rationale](docs/RATIONALE.md)
