@@ -60,18 +60,26 @@ function hasUnresolvedHold(steps: DoneStep[]): boolean {
  * yet is `planned`.
  */
 export function getShipmentStatus(s: Shipment): ShipmentStatus {
-  const steps = doneSteps(s);
-  if (hasUnresolvedHold(steps)) return "customs_hold";
+  if (hasUnresolvedHold(doneSteps(s))) return "customs_hold";
 
-  // A resolved hold says nothing about where the shipment is, so it never counts as furthest.
-  const furthest = steps
+  const furthest = getFurthestStep(s);
+  if (furthest === undefined) return "planned";
+
+  const onLastLeg = furthest.leg === s.legs.at(-1);
+  return statusAfter(furthest.milestone.type, onLastLeg);
+}
+
+/**
+ * The step furthest along the route that has happened, with its leg, or `undefined` before
+ * the first one. A customs hold never counts: it says nothing about where the shipment is.
+ */
+export function getFurthestStep(s: Shipment): { milestone: Milestone; leg: Leg } | undefined {
+  const furthest = doneSteps(s)
     .filter((step) => step.milestone.type !== "customs_hold")
     .sort(byTravelOrder)
     .at(-1);
-  if (furthest === undefined) return "planned";
-
-  const onLastLeg = furthest.legIndex === s.legs.length - 1;
-  return statusAfter(furthest.milestone.type, onLastLeg);
+  const leg = furthest && s.legs[furthest.legIndex];
+  return furthest && leg ? { milestone: furthest.milestone, leg } : undefined;
 }
 
 /**
