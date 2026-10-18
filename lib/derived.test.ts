@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getCurrentLeg,
   getEtaStatus,
+  getFurthestStep,
   getLastUpdateAt,
   getShipmentStatus,
   isOverdue,
@@ -151,6 +152,24 @@ describe("getCurrentLeg", () => {
       road("2026-10-12T08:00:00Z", "2026-10-12T09:00:00Z", "2026-10-12T12:00:00Z", 2),
     );
     expect(getCurrentLeg(s)?.sequence).toBe(2);
+  });
+});
+
+describe("getFurthestStep", () => {
+  it("is undefined before anything has happened", () => {
+    expect(getFurthestStep(shipment([road(null, null, null)]))).toBeUndefined();
+  });
+
+  it("is the step furthest along the route, with its leg", () => {
+    const s = shipment([road("2026-10-11T08:00:00Z", "2026-10-11T09:00:00Z", "2026-10-11T12:00:00Z"), road("2026-10-12T08:00:00Z", null, null, 2)]);
+    const furthest = getFurthestStep(s);
+    expect(furthest?.milestone.type).toBe("picked_up");
+    expect(furthest?.leg.sequence).toBe(2);
+  });
+
+  it("never is a customs hold", () => {
+    const sea = leg(1, [["arrived", "2026-10-13T08:00:00Z"], ["customs_hold", "2026-10-13T09:00:00Z"]]);
+    expect(getFurthestStep(shipment([sea]))?.milestone.type).toBe("arrived");
   });
 });
 

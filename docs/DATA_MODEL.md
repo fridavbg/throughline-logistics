@@ -189,13 +189,15 @@ export type CustomerAlert = {
 };
 ```
 
-## 5. Derived values (pure functions in `lib/derived.ts` and `lib/access.ts`)
+## 5. Derived values (pure functions in `lib/derived.ts`, `lib/access.ts` and `lib/ai/eta.ts`)
 | Function | Returns | Rule |
 |---|---|---|
 | `getShipmentStatus(s)` | `ShipmentStatus` | Derived, never stored: an unresolved `customs_hold` (no `customs_cleared` at or after it, by `at`) wins. Otherwise from the furthest completed milestone along the route (leg, then `plannedAt`), not the newest `at`: `at` is the receipt time, so a late report of a missed step would move the shipment backwards. `delivered` on an earlier leg means `at_port`; only on the last leg is the shipment `delivered`. No milestone done: `planned` |
+| `getFurthestStep(s)` | `{ milestone, leg } \| undefined` | The completed milestone furthest along the route (leg, then `plannedAt`), never a `customs_hold`; `undefined` before the first step. Shared by `getShipmentStatus` and `predictEta` so both agree on where the shipment is |
 | `getLastUpdateAt(s)` | `string \| null` | Newest `rawEvents[].receivedAt`; `null` when the operator hasn't reported yet. Computed, so a simulated event can't leave it behind |
 | `isStale(s, now)` | `boolean` | Status is `in_transit` or `at_port` and `now - getLastUpdateAt(s) > 24h` |
 | `getEtaStatus(s, prediction?)` | `EtaStatusWithSource` | Best available ETA = `prediction.latest` if confidence ≥ 0.6, else `operatorEta` (also when there is no prediction). Minus `plannedEta`: ≤ 0h `on_time`, ≤ 24h `at_risk`, > 24h `late`. `source` is `ai_predicted` when the prediction was used, else the operator ETA's source, so the UI can label who says it's late |
+| `predictEta(s, now)` | `EtaPrediction \| undefined` | Simulated AI (A2). None when `planned`, `delivered` or `customs_hold`, or when nothing is known: furthest step < 1h late and not stale. Known delay: `latest` = `plannedEta` + delay, `earliest` = `plannedEta` + 75% of it; none if `operatorEta` is already at or after `latest`. Confidence 0.85, −0.1 while customs is ahead, −0.3 when stale, never below 0.6 (a delay that has happened always counts). Stale with no known delay: `plannedEta` to `plannedEta` + hours since the last update, confidence 0.5 (Needs review). Never changes the shipment |
 | `isOverdue(e, now)` | `boolean` | `now > respondBy` |
 | `getCurrentLeg(s)` | `Leg \| undefined` | The latest leg with a completed milestone, or the next leg once all its milestones are done, so a skipped operator report doesn't hold it back. First leg before departure, last leg once delivered; `undefined` only without legs |
 | `canView(user, s)` | `boolean` | Customer: `customerId` match. Ops: `siteIds === "all"` or `originSiteId` in `siteIds` |
@@ -267,11 +269,11 @@ values must give the inbox a realistic mix at `DEMO_NOW`: one overdue, one due i
 
 | Ref | Customer | Route | Legs | Scenario |
 |---|---|---|---|---|
-| SHP-1042 | Ostrel DE | Terrassa → Hamburg | road → sea → road | Vessel left Valencia 26h late, 1h ago; operator ETA unchanged. In the seed because F6 (demo panel) is cut, so demo step 6 has its delay |
+| SHP-1042 | Ostrel DE | Terrassa → Hamburg | road → sea → road | Vessel left Valencia 26h late, 1h ago; operator ETA unchanged. AI predicts late with High confidence (0.85), so the customer is alerted. In the seed because F6 (demo panel) is cut, so demo step 6 has its delay |
 | SHP-1043 | Thornquist | Zaragoza → Manchester | road → sea → road | Customs hold at Southampton, packing list missing (the one overdue item: tops the inbox) |
 | SHP-1044 | Calvera | Terrassa → Valencia | road | Domestic, on time |
-| SHP-1045 | Ostrel DE | Porto → Hamburg | road → sea → road | Stale: no update for ~26h (due for review in under 10 min) |
-| SHP-1046 | Thornquist | Terrassa → Birmingham | road → sea → road | AI predicts late before operator ETA changes |
+| SHP-1045 | Ostrel DE | Porto → Hamburg | road → sea → road | Stale: no update for ~26h (due for review in under 10 min). AI prediction 0.5: Needs review |
+| SHP-1046 | Thornquist | Terrassa → Birmingham | road → sea → road | Vessel left Barcelona ~24h late; AI predicts at risk before the operator ETA changes. Medium confidence (0.75, customs ahead), so it becomes an ops exception, not a customer alert |
 | SHP-1047 | Calvera | Zaragoza → Murcia | road | Delivered |
 | SHP-1048 | Pellow | Terrassa → Rotterdam | road → sea → road | Low-confidence email update (0.45) → `needs_review`. Arrives via the demo event if F6 is built, otherwise included in seed |
 | SHP-1049 | Ostrel DE | Zaragoza → Hamburg | road | Long-haul road, at risk |

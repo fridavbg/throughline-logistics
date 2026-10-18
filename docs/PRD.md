@@ -83,7 +83,7 @@ Table of all shipments in the user's perimeter.
 - **Summary bar:** counts of on time / at risk / late / delivered (last 30 days).
 - **Shipment cards:** ref, destination, `etaStatus` badge, ETA date with source, one-line
   AI summary.
-- **Alerts panel:** proactive alerts ("Your shipment SHP-1042 is likely to arrive 2 days late").
+- **Alerts panel:** proactive alerts ("Your shipment SHP-1042 is likely to arrive about a day late").
   AI-predicted alerts appear only with High confidence and are labelled as predictions.
 - **AC:** only the customer's own shipments; at-risk and late shipments listed first; works
   well on a phone.

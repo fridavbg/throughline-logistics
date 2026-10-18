@@ -75,9 +75,19 @@ inventing information. It's the first candidate for a next step.
 - "Stale" = no update for 24h while in transit or at port.
 - Response targets (critical 30 min, warning 2 h) and the 0.8 alert threshold are starting
   values to be agreed with the operations team and tuned with real data.
+- ETA prediction values are starting values too (`lib/ai/eta.ts`): a delay under 1h is
+  ignored, a quarter of a delay can be made up, confidence starts at 0.85 and drops by 0.1
+  with customs ahead and 0.3 when stale, but never below 0.6 once a delay has happened:
+  the delay is a fact, so a lower score would show a late shipment as on time. The window
+  never extends past the known delay, because its end decides lateness: a wider window
+  would make shipments look late from uncertainty alone.
 
 **Known limitations**
 - All data and AI output are simulated; no real model quality is demonstrated.
+- The ETA prediction uses only the latest step's delay, not route history (the PRD's A2
+  mentions it): there is no history in synthetic data to learn from. It also gives no
+  prediction during a customs hold, because the release time is unknown; the hold is an
+  ops exception instead.
 - No authentication: personas simulate access control.
 - Real-time updates are simulated with a demo panel.
 - No map view; the leg timeline answers "where is it?".
@@ -86,7 +96,9 @@ inventing information. It's the first candidate for a next step.
   integrations would carry both: a message sent hours late, such as a batched email, would
   then show the step at the right time without making the shipment look freshly updated. Until
   then, status goes by the furthest step along the route rather than the newest `at`, so a
-  late report of a missed step can't move a delivered shipment back to the port.
+  late report of a missed step can't move a delivered shipment back to the port. The ETA
+  prediction inherits this: a step reported hours after it happened reads as that many
+  hours late.
 - A second customs hold on the same leg (held, cleared, held again) is ignored when events
   are applied, because a step that already happened isn't repeated. Status stays `at_port`
   instead of `customs_hold`. No demo shipment is held twice (#35).
