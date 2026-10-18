@@ -1,8 +1,9 @@
 // Each seed shipment must still show the scenario it exists for (docs/DATA_MODEL.md §7).
-// Checks the data itself; status and staleness rules are tested in #9.
+// The rules themselves are tested in lib/derived.test.ts; here they run on the seed.
 import { describe, expect, it } from "vitest";
 import { getBookings } from "@/data/bookings";
 import { getOperatorEvents, getShipments } from "@/data/shipments";
+import { getEtaStatus, getShipmentStatus, isStale } from "@/lib/derived";
 import { DEMO_NOW } from "@/lib/time";
 import type { MilestoneType, Shipment } from "@/lib/types";
 
@@ -161,6 +162,31 @@ describe("seed scenarios", () => {
     const s = get("SHP-1050");
     expect(s.rawEvents).toEqual([]);
     expect(s.legs.flatMap((l) => l.milestones).every((m) => m.at === null)).toBe(true);
+  });
+
+  it("derives the status each scenario describes", () => {
+    const statuses = Object.fromEntries(shipments.map((s) => [s.id, getShipmentStatus(s)]));
+    expect(statuses).toEqual({
+      "SHP-1042": "in_transit",
+      "SHP-1043": "customs_hold",
+      "SHP-1044": "in_transit",
+      "SHP-1045": "in_transit",
+      "SHP-1046": "in_transit",
+      "SHP-1047": "delivered",
+      "SHP-1048": "in_transit",
+      "SHP-1049": "in_transit",
+      "SHP-1050": "planned",
+    });
+  });
+
+  it("has SHP-1045 as the only stale shipment at the demo time", () => {
+    expect(shipments.filter((s) => isStale(s, DEMO_NOW)).map((s) => s.id)).toEqual(["SHP-1045"]);
+  });
+
+  it("has SHP-1049 as the only shipment at risk by its operator ETA (AI predictions come in #12)", () => {
+    const notOnTime = shipments.filter((s) => getEtaStatus(s).status !== "on_time").map((s) => s.id);
+    expect(notOnTime).toEqual(["SHP-1049"]);
+    expect(getEtaStatus(get("SHP-1049"))).toEqual({ status: "at_risk", source: "estimated" });
   });
 
   it("customs steps only appear on shipments leaving the EU", () => {

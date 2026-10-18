@@ -40,6 +40,15 @@ export type ShipmentStatus =
  */
 export type EtaStatus = "on_time" | "at_risk" | "late";
 
+/**
+ * An {@link EtaStatus} together with whose ETA it was judged from, so the UI can say who
+ * thinks the shipment is late: the operator, or our AI prediction.
+ */
+export type EtaStatusWithSource = {
+  status: EtaStatus;
+  source: DataSource;
+};
+
 // ---------- Reference ----------
 
 /** A factory or warehouse that shipments leave from. */

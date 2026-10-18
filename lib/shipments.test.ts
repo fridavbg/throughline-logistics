@@ -163,4 +163,17 @@ describe("applyEvents", () => {
     expect(s.legs.every((l) => l.milestones.every((m) => m.at === null))).toBe(true);
     expect(s.rawEvents).toHaveLength(1);
   });
+
+  it("adds a step that arrives after all of the operator's legs are finished to their last leg", () => {
+    const finished = ["picked_up", "in_transit", "delivered"] as const;
+    const s = applyEvents(roadSeaRoad(), [
+      ...finished.map((type, i) => event("op-corvala", type, `2026-10-11T0${i}:00:00.000Z`)),
+      ...finished.map((type, i) => event("op-corvala", type, `2026-10-13T0${i}:00:00.000Z`)),
+      event("op-corvala", "customs_hold", "2026-10-14T08:00:00.000Z"),
+    ]);
+
+    expect(s.legs[2]?.milestones.map((m) => m.type)).toEqual([...finished, "customs_hold"]);
+    expect(s.legs[0]?.milestones).toHaveLength(3);
+    expect(s.rawEvents).toHaveLength(7);
+  });
 });

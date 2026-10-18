@@ -19,6 +19,11 @@ customer automatically receives a factual acknowledgement with no commitments ("
 of an issue with SHP-1043 and are working on it."). The customer always hears something within
 the target, even when nobody has acted yet.
 
+An AI prediction decides whether a shipment shows as late from confidence 0.6, but a delay
+*alert* needs 0.8. A customer can therefore see "Late" in the portal before getting an alert,
+so the ETA status always carries its source: when it comes from the prediction, the badge says
+it's AI and shows the confidence.
+
 | Feature | Problem it addresses | In the prototype | In production |
 |---|---|---|---|
 | **Status normalization** | Every operator uses different formats and vocabularies; some updates arrive by email | Rule/keyword mapping per operator; email parsed with a fixed confidence | Structured feeds (API/EDI) mapped deterministically. Unstructured input (email, PDF) parsed by an LLM with structured output, validated against the schema; low confidence goes to a review queue |
@@ -75,7 +80,12 @@ inventing information. It's the first candidate for a next step.
 - One time per operator message: `receivedAt` is used both as when a step happened
   (milestone `at`) and as when we last heard from the operator (stale detection). Real
   integrations would carry both: a message sent hours late, such as a batched email, would
-  then show the step at the right time without making the shipment look freshly updated.
+  then show the step at the right time without making the shipment look freshly updated. Until
+  then, status goes by the furthest step along the route rather than the newest `at`, so a
+  late report of a missed step can't move a delivered shipment back to the port.
+- A second customs hold on the same leg (held, cleared, held again) is ignored when events
+  are applied, because a step that already happened isn't repeated. Status stays `at_port`
+  instead of `customs_hold`. No demo shipment is held twice (#35).
 
 **Prioritised next steps**
 1. Real ingestion for the two highest-volume operators + normalization review queue.

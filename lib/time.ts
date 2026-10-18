@@ -23,7 +23,8 @@ export function getNow(): Date {
 // the code. Summer time ends on 25 October, inside the demo window, which would shift seed
 // times by an hour on some machines and not others.
 const MINUTE_MS = 60 * 1000;
-const HOUR_MS = 60 * MINUTE_MS;
+/** One hour in milliseconds, for comparing times. */
+export const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
 function offsetFromNow(ms: number): string {
