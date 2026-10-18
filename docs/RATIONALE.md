@@ -59,6 +59,11 @@ inventing information. It's the first candidate for a next step.
   only: switching persona keeps it, so an approved message shows up for the customer, and a
   reload starts the demo over. Only an approved message or *Resolve* stops the customer's
   escalation acknowledgement; a snooze or a call to the operator doesn't tell the customer anything.
+- Shipment detail (`/shipments/[id]`) is one page per seed shipment, built at deploy time
+  (`generateStaticParams`, `dynamicParams = false`), so the demo stays fully static and an
+  unknown id gets a real 404. Whether the persona may see it is checked in the browser, and a
+  shipment outside their perimeter shows the same "couldn't find" message as an unknown one,
+  so a customer can't learn which ids exist. In production this check moves to the server.
 
 **Production (proposed)**
 - **Ingestion:** operator APIs and webhooks, EDI, inbound email, and optionally a carrier
