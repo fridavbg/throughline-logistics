@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { formatDayTime, getNow } from "@/lib/time";
 import styles from "./AppShell.module.scss";
 
 export type AppShellProps = {
@@ -10,8 +11,13 @@ export type AppShellProps = {
   children: ReactNode;
 };
 
-/** The frame around every page: a skip link, a header with logo and title, and the main content. */
+/**
+ * The frame around every page: a skip link, a header with logo, title and the demo time, and
+ * the main content. The demo time is always visible, so relative times like "Updated 2h ago"
+ * make sense to anyone viewing the demo on a later day.
+ */
 export function AppShell({ title, actions, children }: AppShellProps) {
+  const now = getNow().toISOString();
   return (
     <>
       <a className={styles.skipLink} href="#main">
@@ -23,6 +29,9 @@ export function AppShell({ title, actions, children }: AppShellProps) {
             Throughline
           </Link>
           <h1 className={styles.title}>{title}</h1>
+          <p className={styles.clock}>
+            Demo time: <time dateTime={now}>{formatDayTime(now)}</time>
+          </p>
           {actions && <div className={styles.actions}>{actions}</div>}
         </div>
       </header>
