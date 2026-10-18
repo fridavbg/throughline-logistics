@@ -65,7 +65,8 @@ Data flow: `data/raw` → `lib/normalize` → normalized `Shipment[]` → `lib/a
 - Milestones differ by mode. Sea: gate-in, loaded, departed, arrived, discharged.
   Road: picked-up, in-transit, delivered. Shipments leaving the EU (e.g. to the UK) add customs milestones.
 - `ShipmentStatus` (normalized, shown in UI): `planned`, `in_transit`, `at_port`,
-  `customs_hold`, `delivered`, `exception`. Lateness is `etaStatus`, not a status. The operator's original text is kept
+  `customs_hold`, `delivered`. Lateness is `etaStatus`, not a status, and problems
+  (incident, stale…) are exceptions in the ops inbox, not a status. The operator's original text is kept
   in `rawStatus` for traceability.
 - `source` (where a value comes from) ≠ `etaStatus` (`on_time` | `at_risk` | `late`, is it
   going to make it?). Never mix the two.
