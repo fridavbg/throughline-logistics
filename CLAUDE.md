@@ -42,6 +42,9 @@ components/
 data/
   raw/                      # Operator payloads in DIFFERENT formats/vocabularies
   seed.ts                   # Sites, operators, customers, users
+  bookings.ts               # Booked plan per seed shipment (legs, planned times, documents)
+  plan.ts, locations.ts     # Builders for legs and documents; ports and addresses
+  shipments.ts              # getShipments(): the single entry point for shipment data
 lib/
   types.ts                  # Normalized domain model (source of truth)
   normalize/                # One adapter per operator: raw -> normalized Shipment

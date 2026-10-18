@@ -7,8 +7,8 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./", import.meta.url)) },
   },
   test: {
-    // Tests cover pure logic in lib/ only (CLAUDE.md: no UI tests).
-    include: ["lib/**/*.test.ts"],
+    // Pure logic in lib/, plus checks that the seed data still shows its scenarios. No UI tests.
+    include: ["lib/**/*.test.ts", "data/**/*.test.ts"],
     environment: "node",
   },
 });
