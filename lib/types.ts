@@ -231,10 +231,13 @@ export type EtaPrediction = {
   source: "ai_predicted";
 };
 
-/** The AI's one-sentence answer to a customer's "where is it?". Shown with the `AI` label. */
+/** The AI's short answer to a customer's "where is it?". Shown with the `AI` label. */
 export type ShipmentSummary = {
-  /** One sentence: where the shipment is, whether it's on time, what happens next. */
-  text: string;
+  /**
+   * Short points, shown as a list: where the shipment is, when it arrives and whether
+   * that's on time, a quiet operator if so, and what happens next.
+   */
+  points: string[];
   /** From 0 to 1. Lowered when the sentence leans on a prediction or the operator is quiet. */
   confidence: number;
   /** What the sentence is based on, in plain words, e.g. "Operator estimate; last update 2h ago". */

@@ -1,8 +1,8 @@
 /**
- * Simulated AI shipment summary (A5). A template turns status, current leg and ETA into one
- * plain sentence for the customer: where it is, whether it's on time, what happens next.
+ * Simulated AI shipment summary (A5). A template turns status, current leg and ETA into a
+ * few short points for the customer: where it is, whether it's on time, what happens next.
  * Deterministic. Predictions are worded as predictions and operator estimates as estimates,
- * so the sentence never states more than the data knows. Spec: docs/DATA_MODEL.md §5.
+ * so the summary never states more than the data knows. Spec: docs/DATA_MODEL.md §5.
  */
 import { REVIEW_BELOW } from "@/lib/ai/confidence";
 import { predictEta } from "@/lib/ai/eta";
@@ -14,16 +14,16 @@ import {
   getShipmentStatus,
   isStale,
 } from "@/lib/derived";
-import { formatDay, HOUR_MS } from "@/lib/time";
+import { formatDay, formatDayRange, HOUR_MS } from "@/lib/time";
 import type { EtaPrediction, EtaStatus, Leg, Milestone, Shipment, ShipmentSummary } from "@/lib/types";
 
-/** Confidence when the sentence only repeats operator data: it reports, it doesn't guess. */
+/** Confidence when the summary only repeats operator data: it reports, it doesn't guess. */
 export const FACTS_CONFIDENCE = 0.95;
 
 /**
- * The customer's summary of a shipment, e.g. "At sea from Port of Valencia to Port of
- * Southampton, expected Fri 23 Oct (operator estimate), on time; next: arrival at Port of
- * Southampton."
+ * The customer's summary of a shipment, as short points, e.g.
+ * ["At sea from Port of Valencia to Port of Southampton", "Expected Fri 23 Oct (operator
+ * estimate), on time", "Next: arrival at Port of Southampton"].
  *
  * Its confidence is the AI prediction's when there is one, since a prediction exists exactly
  * when something is uncertain (a delay, or a quiet operator); otherwise {@link FACTS_CONFIDENCE}.
@@ -33,34 +33,38 @@ export function summarizeShipment(s: Shipment, now: Date): ShipmentSummary {
   // Below the review line a prediction is too unsure to state; the operator's ETA is used.
   const trusted = prediction && prediction.confidence >= REVIEW_BELOW ? prediction : undefined;
   return {
-    text: `${sentence(s, now, trusted)}.`,
+    points: points(s, now, trusted),
     confidence: Math.min(FACTS_CONFIDENCE, prediction?.confidence ?? FACTS_CONFIDENCE),
     reason: `${basis(s, trusted)}; ${freshness(s, now)}`,
   };
 }
 
-function sentence(s: Shipment, now: Date, trusted: EtaPrediction | undefined): string {
+/** Where it is, when it arrives, what happens next: one short point each. */
+function points(s: Shipment, now: Date, trusted: EtaPrediction | undefined): string[] {
   const status = getShipmentStatus(s);
   switch (status) {
     case "delivered":
-      return delivered(s);
+      return [delivered(s)];
     case "customs_hold":
-      return `Held by customs at ${holdPlace(s)}; the arrival date depends on when it's released`;
+      return [`Held by customs at ${holdPlace(s)}`, "Arrival date depends on when it's released"];
     case "planned":
-      return `Booked for pickup at ${s.legs[0]?.from.name ?? "origin"}, ${arrival(s, trusted)}`;
+      return [`Booked for pickup at ${s.legs[0]?.from.name ?? "origin"}`, arrival(s, trusted)];
     case "in_transit":
     case "at_port": {
       const stale = isStale(s, now);
-      const quiet = stale ? `, but the operator hasn't sent an update for ${hoursSinceUpdate(s, now)}h` : "";
       // A quiet operator makes the summary "Needs review", so it gives no firm on-time answer,
       // unless a known delay (a fact) is behind the prediction.
       const firm = !stale || trusted !== undefined;
       const step = nextStep(s);
-      const next = step ? `; next: ${upcoming(step.milestone, step.leg, s)}` : "";
-      return `${where(s, status)}, ${arrival(s, trusted, firm)}${quiet}${next}`;
+      return [
+        where(s, status),
+        arrival(s, trusted, firm),
+        ...(stale ? [`No operator update for ${hoursSinceUpdate(s, now)}h`] : []),
+        ...(step ? [`Next: ${upcoming(step.milestone, step.leg, s)}`] : []),
+      ];
     }
     default: {
-      // Adding a status without a sentence here fails to compile.
+      // Adding a status without points here fails to compile.
       const unhandled: never = status;
       throw new Error(`Unhandled status: ${String(unhandled)}`);
     }
@@ -80,11 +84,11 @@ function where(s: Shipment, status: "in_transit" | "at_port"): string {
 /** When it arrives, worded by who says so, and when `firm`, whether that's on time. */
 function arrival(s: Shipment, trusted: EtaPrediction | undefined, firm = true): string {
   const lateness = firm ? `, ${latenessWords(getEtaStatus(s, trusted).status)}` : "";
-  if (trusted) return `AI predicts arrival ${dayRange(trusted.earliest, trusted.latest)}${lateness}`;
+  if (trusted) return `AI predicts arrival ${formatDayRange(trusted.earliest, trusted.latest)}${lateness}`;
   const day = formatDay(s.operatorEta.date);
   return s.operatorEta.source === "confirmed"
-    ? `arriving ${day}${lateness}`
-    : `expected ${day} (operator estimate)${lateness}`;
+    ? `Arriving ${day}${lateness}`
+    : `Expected ${day} (operator estimate)${lateness}`;
 }
 
 function latenessWords(status: EtaStatus): string {
@@ -162,7 +166,7 @@ function upcoming(m: Milestone, leg: Leg, s: Shipment): string {
   }
 }
 
-/** What the sentence rests on: the AI prediction's reason, or whose ETA it repeats. */
+/** What the summary rests on: the AI prediction's reason, or whose ETA it repeats. */
 function basis(s: Shipment, trusted: EtaPrediction | undefined): string {
   if (trusted) return `AI prediction: ${trusted.reason}`;
   const status = getShipmentStatus(s);
@@ -181,10 +185,4 @@ function freshness(s: Shipment, now: Date): string {
 function hoursSinceUpdate(s: Shipment, now: Date): number {
   const last = getLastUpdateAt(s);
   return last === null ? 0 : Math.round((now.getTime() - Date.parse(last)) / HOUR_MS);
-}
-
-/** "Fri 23 Oct", or "Fri 23 Oct – Sat 24 Oct" when the window spans days. */
-function dayRange(earliest: string, latest: string): string {
-  const [from, to] = [formatDay(earliest), formatDay(latest)];
-  return from === to ? from : `${from} – ${to}`;
 }

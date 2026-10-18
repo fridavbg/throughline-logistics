@@ -60,90 +60,103 @@ function shipment(seaSteps: Step[], overrides: Partial<Shipment> = {}): Shipment
 const atSea: Step[] = [["loaded", -6, -6], ["departed", -2, -2], ["arrived", 60, null], ["discharged", 62, null]];
 const ETA_DAY = formatDay(t(90));
 
-describe("summarizeShipment: one sentence per status", () => {
+describe("summarizeShipment: points per status", () => {
   it("planned: where it will be picked up and when it's expected", () => {
     const s = shipment([["departed", 10, null]], {
       legs: [leg(1, "road", terrassa, leeds, [["picked_up", 5, null], ["delivered", 90, null]])],
       rawEvents: [],
     });
-    expect(summarizeShipment(s, NOW).text).toBe(
-      `Booked for pickup at Terrassa plant, expected ${ETA_DAY} (operator estimate), on time.`,
-    );
+    expect(summarizeShipment(s, NOW).points).toEqual([
+      "Booked for pickup at Terrassa plant",
+      `Expected ${ETA_DAY} (operator estimate), on time`,
+    ]);
   });
 
   it("in transit: the current leg, the ETA and the next step", () => {
-    expect(summarizeShipment(shipment(atSea), NOW).text).toBe(
-      `At sea from Port of Valencia to Port of Southampton, expected ${ETA_DAY} (operator estimate), on time; next: arrival at Port of Southampton.`,
-    );
+    expect(summarizeShipment(shipment(atSea), NOW).points).toEqual([
+      "At sea from Port of Valencia to Port of Southampton",
+      `Expected ${ETA_DAY} (operator estimate), on time`,
+      "Next: arrival at Port of Southampton",
+    ]);
   });
 
   it("at port: the port of the latest step", () => {
     const s = shipment([["departed", -40, -40], ["arrived", -3, -3], ["discharged", 2, null]]);
-    expect(summarizeShipment(s, NOW).text).toBe(
-      `At Port of Southampton, expected ${ETA_DAY} (operator estimate), on time; next: unloading at Port of Southampton.`,
-    );
+    expect(summarizeShipment(s, NOW).points).toEqual([
+      "At Port of Southampton",
+      `Expected ${ETA_DAY} (operator estimate), on time`,
+      "Next: unloading at Port of Southampton",
+    ]);
   });
 
   it("customs hold: no arrival date, since the release time is unknown", () => {
     const s = shipment([["arrived", -5, -5], ["customs_hold", -4, -4], ["customs_cleared", 10, null]], {
       requiresCustoms: true,
     });
-    const summary = summarizeShipment(s, NOW);
-    expect(summary.text).toBe("Held by customs at Port of Southampton; the arrival date depends on when it's released.");
-    expect(summary.text).not.toContain(ETA_DAY);
+    const { points } = summarizeShipment(s, NOW);
+    expect(points).toEqual(["Held by customs at Port of Southampton", "Arrival date depends on when it's released"]);
+    expect(points.join(" ")).not.toContain(ETA_DAY);
   });
 
   it("delivered: where and when, from the delivery step", () => {
     const s = shipment([["departed", -40, -40], ["arrived", -20, -20]], {
       legs: [leg(1, "road", terrassa, leeds, [["picked_up", -30, -30], ["delivered", -3, -3]])],
     });
-    expect(summarizeShipment(s, NOW).text).toBe(`Delivered to Leeds DC on ${formatDay(t(-3))}.`);
+    expect(summarizeShipment(s, NOW).points).toEqual([`Delivered to Leeds DC on ${formatDay(t(-3))}`]);
   });
 });
 
+/** The point about the arrival: the second one for a moving shipment. */
+const arrivalPoint = (s: Shipment) => summarizeShipment(s, NOW).points[1];
+
 describe("summarizeShipment: one wording per ETA status", () => {
   it("on time when the operator's ETA keeps the promise", () => {
-    expect(summarizeShipment(shipment(atSea), NOW).text).toContain(", on time;");
+    expect(arrivalPoint(shipment(atSea))).toBe(`Expected ${ETA_DAY} (operator estimate), on time`);
   });
 
   it("up to a day late when the operator's ETA is within 24h of the promise", () => {
     const s = shipment(atSea, { operatorEta: { date: t(100), source: "estimated" } });
-    expect(summarizeShipment(s, NOW).text).toContain(`expected ${formatDay(t(100))} (operator estimate), up to a day late;`);
+    expect(arrivalPoint(s)).toBe(`Expected ${formatDay(t(100))} (operator estimate), up to a day late`);
   });
 
   it("more than a day late when the AI predicts beyond 24h, with the window's days", () => {
     const late: Step[] = [["loaded", -60, -6], ["departed", -50, -2], ["arrived", 60, null]];
-    const text = summarizeShipment(shipment(late), NOW).text;
-    expect(text).toContain(`AI predicts arrival ${formatDay(t(126))} – ${formatDay(t(138))}, more than a day late;`);
+    expect(arrivalPoint(shipment(late))).toBe(
+      `AI predicts arrival ${formatDay(t(126))} – ${formatDay(t(138))}, more than a day late`,
+    );
   });
 
   it("names one day when the AI's window starts and ends on the same day", () => {
     const late: Step[] = [["loaded", -40, -6], ["departed", -30, -2], ["arrived", 60, null]];
     expect(formatDay(t(111))).toBe(formatDay(t(118)));
-    expect(summarizeShipment(shipment(late), NOW).text).toContain(`AI predicts arrival ${formatDay(t(118))}, more`);
+    expect(arrivalPoint(shipment(late))).toBe(`AI predicts arrival ${formatDay(t(118))}, more than a day late`);
   });
 });
 
 describe("summarizeShipment: never states more than the data knows", () => {
-  it("says 'arriving' only for a confirmed ETA", () => {
+  it("says 'Arriving' only for a confirmed ETA", () => {
     const s = shipment(atSea, { operatorEta: { date: t(90), source: "confirmed" } });
-    expect(summarizeShipment(s, NOW).text).toContain(`arriving ${ETA_DAY}, on time`);
-    expect(summarizeShipment(shipment(atSea), NOW).text).not.toContain("arriving");
+    expect(arrivalPoint(s)).toBe(`Arriving ${ETA_DAY}, on time`);
+    expect(summarizeShipment(shipment(atSea), NOW).points.join(" ")).not.toContain("Arriving");
   });
 
   it("words an AI prediction as one, with its reason as the why", () => {
     const late: Step[] = [["loaded", -40, -6], ["departed", -30, -2], ["arrived", 60, null]];
     const summary = summarizeShipment(shipment(late), NOW);
-    expect(summary.text).toContain("AI predicts arrival");
+    expect(summary.points[1]).toMatch(/^AI predicts arrival/);
     expect(summary.confidence).toBe(0.85);
     expect(summary.reason).toBe("AI prediction: Vessel departed 28h late from Port of Valencia; last update 2h ago");
   });
 
   it("leaves out a prediction that needs review, and says the operator has gone quiet", () => {
     const summary = summarizeShipment(shipment(atSea, { rawEvents: [rawEvent(31)] }), NOW);
-    expect(summary.text).not.toContain("AI predicts");
     // "Needs review" means no firm answer, so it doesn't say "on time".
-    expect(summary.text).toContain(`expected ${ETA_DAY} (operator estimate), but the operator hasn't sent an update for 31h;`);
+    expect(summary.points).toEqual([
+      "At sea from Port of Valencia to Port of Southampton",
+      `Expected ${ETA_DAY} (operator estimate)`,
+      "No operator update for 31h",
+      "Next: arrival at Port of Southampton",
+    ]);
     expect(summary.confidence).toBe(0.5);
     expect(summary.reason).toBe("Operator estimate; last update 31h ago");
   });
@@ -151,7 +164,8 @@ describe("summarizeShipment: never states more than the data knows", () => {
   it("still says how late when a known delay is behind a quiet operator", () => {
     const late: Step[] = [["loaded", -70, -40], ["departed", -60, -31], ["arrived", 60, null]];
     const summary = summarizeShipment(shipment(late, { rawEvents: [rawEvent(31)] }), NOW);
-    expect(summary.text).toContain("more than a day late, but the operator hasn't sent an update for 31h");
+    expect(summary.points[1]).toMatch(/more than a day late$/);
+    expect(summary.points[2]).toBe("No operator update for 31h");
     expect(summary.confidence).toBe(0.6);
   });
 
@@ -161,17 +175,17 @@ describe("summarizeShipment: never states more than the data knows", () => {
     expect(summary.reason).toBe("Operator estimate; last update 2h ago");
   });
 
-  it("says 'reported delivered' when the delivery is only an estimate", () => {
+  it("says 'Reported delivered' when the delivery is only an estimate", () => {
     const road = leg(1, "road", terrassa, leeds, [["picked_up", -30, -30], ["delivered", -3, -3]]);
     const estimated = { ...road, milestones: road.milestones.map((m) => ({ ...m, source: "estimated" as const })) };
-    expect(summarizeShipment(shipment([], { legs: [estimated] }), NOW).text).toMatch(/^Reported delivered to Leeds DC/);
+    expect(summarizeShipment(shipment([], { legs: [estimated] }), NOW).points[0]).toMatch(/^Reported delivered to Leeds DC/);
   });
 });
 
 describe("summarizeShipment: what happens next", () => {
   it("skips steps the operator never reported, and goes on from the furthest one", () => {
     const skipped: Step[] = [["loaded", -6, null], ["departed", -2, -2], ["arrived", 60, null]];
-    expect(summarizeShipment(shipment(skipped), NOW).text).toContain("next: arrival at Port of Southampton.");
+    expect(summarizeShipment(shipment(skipped), NOW).points.at(-1)).toBe("Next: arrival at Port of Southampton");
   });
 
   it("calls a drop-off at the port on an earlier leg a drop-off, not a delivery", () => {
@@ -181,6 +195,6 @@ describe("summarizeShipment: what happens next", () => {
         leg(2, "sea", valencia, southampton, [["departed", 20, null]]),
       ],
     });
-    expect(summarizeShipment(s, NOW).text).toContain("next: drop-off at Port of Valencia.");
+    expect(summarizeShipment(s, NOW).points.at(-1)).toBe("Next: drop-off at Port of Valencia");
   });
 });

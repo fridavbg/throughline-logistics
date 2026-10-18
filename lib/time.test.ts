@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   DEMO_NOW,
+  formatAgo,
   formatDay,
+  formatDayRange,
   daysAgo,
   daysFromNow,
   getNow,
@@ -62,5 +64,25 @@ describe("formatDay", () => {
 
   it("says the date is unknown instead of throwing on a bad value", () => {
     expect(formatDay("not-a-date")).toBe("date unknown");
+  });
+});
+
+describe("formatDayRange", () => {
+  it("names one day when both ends fall on it, else both", () => {
+    expect(formatDayRange("2026-10-23T08:00:00Z", "2026-10-23T20:00:00Z")).toBe("Fri 23 Oct");
+    expect(formatDayRange("2026-10-23T08:00:00Z", "2026-10-24T08:00:00Z")).toBe("Fri 23 Oct – Sat 24 Oct");
+  });
+});
+
+describe("formatAgo", () => {
+  it("says how long ago, in minutes, hours, then days", () => {
+    expect(formatAgo(minutesAgo(12), DEMO_NOW)).toBe("12 min ago");
+    expect(formatAgo(hoursAgo(31), DEMO_NOW)).toBe("31h ago");
+    expect(formatAgo(daysAgo(3), DEMO_NOW)).toBe("3 days ago");
+  });
+
+  it("calls a future time 'just now' and a bad one unknown", () => {
+    expect(formatAgo(hoursFromNow(1), DEMO_NOW)).toBe("just now");
+    expect(formatAgo("nope", DEMO_NOW)).toBe("time unknown");
   });
 });
