@@ -82,11 +82,16 @@ export function routeLabel(item: InboxItem): string {
  */
 export function approvedAlert(draft: NotificationDraft, severity: ShipmentException["severity"], text: string, now: Date): CustomerAlert {
   return {
-    id: `sent-${draft.exceptionId}`,
+    id: sentAlertId(draft.exceptionId),
     shipmentId: draft.shipmentId,
     severity: severity === "critical" ? "critical" : "warning",
     message: text.trim(),
     createdAt: now.toISOString(),
     source: "confirmed",
   };
+}
+
+/** The id of the alert sent for an exception, so other views can tell that a message went out. */
+export function sentAlertId(exceptionId: string): string {
+  return `sent-${exceptionId}`;
 }

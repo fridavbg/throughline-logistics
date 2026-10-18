@@ -21,10 +21,11 @@ export function homePath(role: User["role"]): "/ops" | "/customer" {
 /**
  * Where to send someone who opens a page meant for `pageRole`: to the picker with no
  * persona, to their own home with another role, or nowhere (null) when the page is theirs.
+ * Without `pageRole` the page is for every role, such as the shared shipment detail.
  */
-export function redirectFor(user: User | undefined, pageRole: User["role"]): string | null {
+export function redirectFor(user: User | undefined, pageRole?: User["role"]): string | null {
   if (!user) return "/";
-  if (user.role !== pageRole) return homePath(user.role);
+  if (pageRole !== undefined && user.role !== pageRole) return homePath(user.role);
   return null;
 }
 

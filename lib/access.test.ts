@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { users } from "@/data/seed";
 import { getShipments } from "@/data/shipments";
-import { canView, visibleShipments } from "@/lib/access";
+import { canView, findVisibleShipment, visibleShipments } from "@/lib/access";
 import type { Shipment, User } from "@/lib/types";
 
 const shipments = getShipments();
@@ -53,5 +53,28 @@ describe("canView", () => {
     const two: User = { id: "u", name: "Two", role: "ops", siteIds: ["site-porto", "site-zaragoza"] };
     const sites = new Set(visibleShipments(two, shipments).map((s) => s.originSiteId));
     expect(sites).toEqual(new Set(["site-porto", "site-zaragoza"]));
+  });
+});
+
+describe("findVisibleShipment", () => {
+  it("finds a shipment the persona may see", () => {
+    expect(findVisibleShipment(persona("user-summer"), shipments, "SHP-1042")?.id).toBe("SHP-1042");
+  });
+
+  it("hides another customer's shipment exactly like an unknown id", () => {
+    // SHP-1043 belongs to Thornquist, not Ostrel Deutschland.
+    expect(findVisibleShipment(persona("user-summer"), shipments, "SHP-1043")).toBeUndefined();
+    expect(findVisibleShipment(persona("user-summer"), shipments, "SHP-9999")).toBeUndefined();
+  });
+
+  it("hides shipments from other sites for a site-bound ops user", () => {
+    // SHP-1043 leaves Zaragoza; Morty only sees Terrassa.
+    expect(findVisibleShipment(persona("user-morty"), shipments, "SHP-1043")).toBeUndefined();
+    expect(findVisibleShipment(persona("user-rick"), shipments, "SHP-1043")?.id).toBe("SHP-1043");
+  });
+
+  it("matches the id exactly", () => {
+    expect(findVisibleShipment(persona("user-rick"), shipments, "shp-1042")).toBeUndefined();
+    expect(findVisibleShipment(persona("user-rick"), shipments, "")).toBeUndefined();
   });
 });

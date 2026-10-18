@@ -39,6 +39,25 @@ export function formatDay(iso: string): string {
   return Number.isNaN(ms) ? "date unknown" : dayFormat.format(ms);
 }
 
+const dayTimeFormat = new Intl.DateTimeFormat("en-GB", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: DEMO_TIME_ZONE,
+});
+
+/**
+ * A date with its time, for timeline steps, e.g. `formatDayTime("2026-10-23T12:00:00Z")` →
+ * "Fri 23 Oct, 14:00" (Spain). An unreadable date gives "date unknown", like {@link formatDay}.
+ */
+export function formatDayTime(iso: string): string {
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? "date unknown" : dayTimeFormat.format(ms);
+}
+
 /** A window of days: "Fri 23 Oct", or "Fri 23 Oct – Sat 24 Oct" when it spans days. */
 export function formatDayRange(earliest: string, latest: string): string {
   const [from, to] = [formatDay(earliest), formatDay(latest)];

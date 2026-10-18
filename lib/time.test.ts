@@ -3,6 +3,7 @@ import {
   DEMO_NOW,
   formatAgo,
   formatDay,
+  formatDayTime,
   formatDayRange,
   formatDuration,
   daysAgo,
@@ -93,5 +94,20 @@ describe("formatDuration", () => {
     expect(formatDuration(8)).toBe("8 min");
     expect(formatDuration(80)).toBe("1h 20 min");
     expect(formatDuration(120)).toBe("2h");
+  });
+});
+
+describe("formatDayTime", () => {
+  it("shows the day and 24h time in Spain's time zone", () => {
+    expect(formatDayTime("2026-10-23T12:00:00Z")).toBe("Fri 23 Oct, 14:00");
+  });
+
+  it("follows the end of summer time on 25 October", () => {
+    // 12:00 UTC is 13:00 in Spain once the clocks go back.
+    expect(formatDayTime("2026-10-26T12:00:00Z")).toBe("Mon 26 Oct, 13:00");
+  });
+
+  it("says the date is unknown instead of inventing one", () => {
+    expect(formatDayTime("not a date")).toBe("date unknown");
   });
 });
