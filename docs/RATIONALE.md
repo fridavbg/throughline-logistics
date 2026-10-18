@@ -83,6 +83,9 @@ inventing information. It's the first candidate for a next step.
   then show the step at the right time without making the shipment look freshly updated. Until
   then, status goes by the furthest step along the route rather than the newest `at`, so a
   late report of a missed step can't move a delivered shipment back to the port.
+- A second customs hold on the same leg (held, cleared, held again) is ignored when events
+  are applied, because a step that already happened isn't repeated. Status stays `at_port`
+  instead of `customs_hold`. No demo shipment is held twice (#35).
 
 **Prioritised next steps**
 1. Real ingestion for the two highest-volume operators + normalization review queue.
