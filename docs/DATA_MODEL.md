@@ -239,6 +239,22 @@ Hi, the container is held by UK customs at Southampton pending the packing list.
 Every shipment exists to demonstrate something. Build SHP-1042 → SHP-1050 first (P0, covers
 every demo step); SHP-1051 → SHP-1055 are P2 and add variety.
 
+**Building shipments:** `data/bookings.ts` holds each booked plan, `data/raw` the operator
+feeds, and `getShipments()` (`data/shipments.ts`) is the single entry point that applies them
+with `applyEvents` (`lib/shipments.ts`):
+- an event completes the first matching step on **one** leg run by that operator;
+- a step that already happened isn't changed again, and an exact duplicate message is stored once;
+- events below 0.6 confidence are kept for review but don't change the timeline;
+- unplanned steps (a customs hold) are added to the leg the operator is working on.
+
+Customs milestones sit on the sea leg, after `discharged`, at the arrival port. Seed emails carry
+a precomputed reading; the email normalizer is #19.
+
+**Exception timing:** an exception's `detectedAt` is the arrival time of the operator event
+that revealed it (a stale shipment: last update + 24h). Seed events are timed so the inbox at
+`DEMO_NOW` has one overdue item (SHP-1043 customs hold), one due within 10 min (SHP-1045
+stale) and the rest with at least 30 min left.
+
 **Raw events:** every operator update on a seed shipment is a `rawEvents` entry, because the
 last update time is computed from them.
 
@@ -249,10 +265,10 @@ values must give the inbox a realistic mix at `DEMO_NOW`: one overdue, one due i
 
 | Ref | Customer | Route | Legs | Scenario |
 |---|---|---|---|---|
-| SHP-1042 | Ostrel DE | Terrassa → Hamburg | road → sea → road | On time → late via demo event (vessel delay) |
-| SHP-1043 | Thornquist | Zaragoza → Manchester | road → sea → road | Customs hold at Southampton, packing list missing |
+| SHP-1042 | Ostrel DE | Terrassa → Hamburg | road → sea → road | Vessel left Valencia 26h late, 1h ago; operator ETA unchanged. In the seed because F6 (demo panel) is cut, so demo step 6 has its delay |
+| SHP-1043 | Thornquist | Zaragoza → Manchester | road → sea → road | Customs hold at Southampton, packing list missing (the one overdue item: tops the inbox) |
 | SHP-1044 | Calvera | Terrassa → Valencia | road | Domestic, on time |
-| SHP-1045 | Ostrel DE | Porto → Hamburg | road → sea → road | Stale: no update for 31h |
+| SHP-1045 | Ostrel DE | Porto → Hamburg | road → sea → road | Stale: no update for ~26h (due for review in under 10 min) |
 | SHP-1046 | Thornquist | Terrassa → Birmingham | road → sea → road | AI predicts late before operator ETA changes |
 | SHP-1047 | Calvera | Zaragoza → Murcia | road | Delivered |
 | SHP-1048 | Pellow | Terrassa → Rotterdam | road → sea → road | Low-confidence email update (0.45) → `needs_review`. Arrives via the demo event if F6 is built, otherwise included in seed |
