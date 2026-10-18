@@ -142,7 +142,8 @@ apart from operator data. Longer AI blocks (suggestions, drafts) add a dashed le
 ## 7. Screens
 
 **App shell**
-- Header: Throughline logo · page title · RoleSwitcher.
+- Header: Throughline logo · page title · demo time ("Demo time: Wed 21 Oct, 10:00") ·
+  RoleSwitcher. The demo time is always visible, not only in the demo panel.
 - Ops: left nav (Attention, Shipments) from `lg`; tabs under the header below `lg`.
 - Customer: no nav needed; single page plus detail.
 

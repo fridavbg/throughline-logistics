@@ -8,6 +8,8 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
 **Live demo:** https://throughline-logistics.vercel.app
 
 > Frontend-only prototype. All data, operators and AI output are synthetic.
+> The app runs at a fixed demo time, **Wed 21 Oct 2026, 10:00** (Spain), shown in the header,
+> so every visit shows the same state. Times like "Updated 2h ago" count from it.
 
 ## Demo walkthrough (≈ 3 min)
 1. Sign in as **Rick (Ops, all sites)** → the attention inbox ranks the customs hold on
