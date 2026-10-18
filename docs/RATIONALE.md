@@ -41,6 +41,11 @@ inventing information. It's the first candidate for a next step.
 - Zustand: global state is small (current persona, simulated events), so the lightest option.
 - Mock data layer mirrors a real integration layer: raw operator payloads → one adapter per
   operator → a single normalized model. Swapping mocks for real feeds changes only the adapters.
+- Views that show shipment data are Client Components reading from the Zustand store, which
+  holds the current persona and the shipments (seed data plus demo events). Server Components
+  can't see either: both live only in the browser, so a server render couldn't filter by role
+  or show a simulated event. Static parts (layout, headings) stay Server Components. In
+  production, data and access control move to the server (see below).
 
 **Production (proposed)**
 - **Ingestion:** operator APIs and webhooks, EDI, inbound email, and optionally a carrier

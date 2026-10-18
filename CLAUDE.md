@@ -103,6 +103,8 @@ alerts reach customers only with High confidence (≥ 0.8), otherwise they becom
 ## Conventions
 - Functional components, named exports, props typed with `type`.
 - Server Components by default; add `"use client"` only where state or interactivity is needed.
+  Views that show shipment data are Client Components: they read the persona and shipments
+  from the Zustand store, which the server can't see (`docs/RATIONALE.md` §2).
 - Pure functions in `lib/` with no React imports, so they're easy to test.
 - Small files (< ~200 lines). Extract components when they grow.
 - No `any`. Domain types only from `lib/types.ts`.
