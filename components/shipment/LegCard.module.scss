@@ -1,0 +1,114 @@
+.legCard {
+  display: grid;
+  gap: var(--space-4);
+}
+
+// Icon on the left, title and details stacked beside it.
+.header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: center;
+}
+
+.icon {
+  grid-row: span 3;
+  align-self: start;
+  display: inline-flex;
+  color: var(--color-text-muted);
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.meta {
+  grid-column: 2;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+// A vertical line with one dot per step. The dots sit on the line, centred on it.
+.steps {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 0 calc(var(--space-3) / 2);
+  padding: 0 0 0 var(--space-4);
+  border-left: 2px solid var(--color-border);
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.dot {
+  position: absolute;
+  top: calc(0.75lh - var(--space-3) / 2);
+  left: calc(-1 * var(--space-4) - var(--space-3) / 2 - 1px);
+  width: var(--space-3);
+  height: var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.label {
+  font-weight: var(--weight-medium);
+}
+
+.when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.done .dot {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.hold .dot {
+  border-color: var(--status-incident);
+  background: var(--status-incident);
+}
+
+.current .dot {
+  border-color: var(--status-info);
+  box-shadow: 0 0 0 3px var(--status-info-bg);
+}
+
+.next {
+  color: var(--status-info);
+}
+
+.upcoming .label,
+.not_reported .label {
+  color: var(--color-text-muted);
+}
+
+.not_reported .dot {
+  border-style: dashed;
+  border-color: var(--color-text-muted);
+}
+
+// A gentle pulse on the next step, only for people who haven't asked for less motion.
+@media (prefers-reduced-motion: no-preference) {
+  .current .dot {
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 0 6px var(--status-info-bg);
+  }
+}

@@ -9,14 +9,14 @@ import type { User } from "@/lib/types";
 import styles from "./RoleGate.module.scss";
 
 export type RoleGateProps = {
-  /** The role this page is for. */
-  role: User["role"];
+  /** The role this page is for. Leave it out for a page every role may open, such as shipment detail. */
+  role?: User["role"];
   children: ReactNode;
 };
 
 /**
- * Shows the page only to a persona with the right role. With no persona it goes to the
- * picker; with another role it goes to that role's own home. Until the saved persona has
+ * Shows the page only to a persona with the right role (or any persona, without `role`). With no
+ * persona it goes to the picker; with another role it goes to that role's own home. Until the saved persona has
  * been read back, it shows a skeleton instead of redirecting too early.
  */
 export function RoleGate({ role, children }: RoleGateProps) {
