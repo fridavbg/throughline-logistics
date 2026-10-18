@@ -1,0 +1,59 @@
+.panel {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.heading {
+  font-size: var(--text-lg);
+}
+
+.empty {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.list {
+  display: grid;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+.name {
+  overflow-wrap: anywhere;
+}
+
+.status {
+  font-weight: var(--weight-medium);
+}
+
+.available {
+  color: var(--status-ontime);
+
+  .name {
+    color: var(--color-text);
+  }
+}
+
+.missing {
+  color: var(--status-risk);
+
+  .name {
+    color: var(--color-text);
+  }
+}

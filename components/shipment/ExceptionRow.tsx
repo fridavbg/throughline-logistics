@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AiLabel } from "@/components/ai/AiLabel";
 import { AiReason } from "@/components/ai/AiReason";
 import { ConfidenceMeter } from "@/components/ai/ConfidenceMeter";
@@ -16,6 +17,8 @@ import styles from "./ExceptionRow.module.scss";
 export type ExceptionRowProps = {
   item: InboxItem;
   now: Date;
+  /** Whether the ref links to the shipment's detail page. Off on that page itself. Defaults to true. */
+  linkToShipment?: boolean;
 };
 
 /** A Record over the union fails to compile if a new action is added without a button label. */
@@ -31,7 +34,7 @@ const ACTION_LABELS: Record<NextAction, string> = {
  * next action with its button (DESIGN §6, ExceptionRow). A card on every width; the layout
  * spreads out from md.
  */
-export function ExceptionRow({ item, now }: ExceptionRowProps) {
+export function ExceptionRow({ item, now, linkToShipment = true }: ExceptionRowProps) {
   const handle = useDemoStore((state) => state.handle);
   const resolve = useDemoStore((state) => state.resolve);
   const send = useDemoStore((state) => state.send);
@@ -46,7 +49,14 @@ export function ExceptionRow({ item, now }: ExceptionRowProps) {
           {e.priorityScore}
         </span>
         <h3 className={styles.title}>
-          <code className={styles.ref}>{shipment.id}</code> <span>{customer?.name ?? "Unknown customer"}</span>
+          {linkToShipment ? (
+            <Link href={`/shipments/${shipment.id}`}>
+              <code className={styles.ref}>{shipment.id}</code>
+            </Link>
+          ) : (
+            <code className={styles.ref}>{shipment.id}</code>
+          )}{" "}
+          <span>{customer?.name ?? "Unknown customer"}</span>
         </h3>
         <ExceptionBadge type={e.type} severity={e.severity} />
       </header>

@@ -174,6 +174,12 @@ describe("summarizeShipment: never states more than the data knows", () => {
     expect(summary.confidence).toBe(0.6);
   });
 
+  it("keeps a delay the operator reported, even after the operator has gone quiet", () => {
+    // The operator's own ETA is 30h after the promise; silence doesn't make that less late.
+    const s = shipment(atSea, { rawEvents: [rawEvent(31)], operatorEta: { date: t(120), source: "estimated" } });
+    expect(arrivalPoint(s)).toBe(`Expected ${formatDay(t(120))} (operator estimate), more than a day late`);
+  });
+
   it("is confident when it only repeats operator data", () => {
     const summary = summarizeShipment(shipment(atSea), NOW);
     expect(summary.confidence).toBe(FACTS_CONFIDENCE);

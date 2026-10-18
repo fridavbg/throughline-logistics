@@ -29,6 +29,12 @@ describe("redirectFor", () => {
     expect(redirectFor(summer, "customer")).toBeNull();
     expect(redirectFor(morty, "ops")).toBeNull();
   });
+
+  it("lets every persona stay on a page for all roles, but not someone without a persona", () => {
+    expect(redirectFor(summer)).toBeNull();
+    expect(redirectFor(rick)).toBeNull();
+    expect(redirectFor(undefined)).toBe("/");
+  });
 });
 
 describe("roleLabel", () => {

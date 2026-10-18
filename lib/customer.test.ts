@@ -23,11 +23,11 @@ function deliveredAt(id: string, at: string): Shipment {
 }
 
 describe("customerShipments", () => {
-  it("lists late first, then at risk, then on time", () => {
+  it("lists late first, then at risk, then unknown", () => {
     expect(ostrel.map((v) => [v.shipment.id, v.eta.status])).toEqual([
       ["SHP-1042", "late"],
       ["SHP-1049", "at_risk"],
-      ["SHP-1045", "on_time"],
+      ["SHP-1045", "unknown"],
     ]);
   });
 
@@ -41,10 +41,10 @@ describe("customerShipments", () => {
     expect(views.map((v) => v.shipment.id)).toEqual(["SHP-1044"]);
   });
 
-  it("hides a prediction that needs review, so the operator's ETA decides", () => {
+  it("hides a prediction that needs review, and makes no on-time claim for a quiet operator", () => {
     const stale = ostrel.find((v) => v.shipment.id === "SHP-1045");
     expect(stale?.prediction).toBeUndefined();
-    expect(stale?.eta).toEqual({ status: "on_time", source: "estimated" });
+    expect(stale?.eta).toEqual({ status: "unknown", source: "estimated" });
   });
 
   it("carries the AI summary for each card", () => {
@@ -54,7 +54,7 @@ describe("customerShipments", () => {
 
 describe("countByEta", () => {
   it("counts active shipments by ETA status and deliveries apart", () => {
-    expect(countByEta(ostrel)).toEqual({ on_time: 1, at_risk: 1, late: 1, unknown: 0, delivered: 0 });
+    expect(countByEta(ostrel)).toEqual({ on_time: 0, at_risk: 1, late: 1, unknown: 1, delivered: 0 });
     const views = customerShipments([deliveredAt("SHP-1044", daysAgo(2)), ...all.slice(0, 1)], NOW);
     expect(countByEta(views)).toEqual({ on_time: 0, at_risk: 0, late: 1, unknown: 0, delivered: 1 });
   });
@@ -100,7 +100,7 @@ describe("customerAlerts", () => {
     const unknown = ostrel.map((v) => {
       if (v.shipment.id !== "SHP-1042" || !v.prediction) return v;
       const prediction = { ...v.prediction, latest: "not a date" };
-      return { ...v, prediction, eta: getEtaStatus(v.shipment, prediction) };
+      return { ...v, prediction, eta: getEtaStatus(v.shipment, getNow(), prediction) };
     });
     expect(unknown.find((v) => v.shipment.id === "SHP-1042")?.eta.status).toBe("unknown");
     expect(customerAlerts(unknown)).toEqual([]);

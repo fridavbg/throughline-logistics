@@ -48,17 +48,14 @@ function points(s: Shipment, now: Date, trusted: EtaPrediction | undefined): str
     case "customs_hold":
       return [`Held by customs at ${holdPlace(s)}`, "Arrival date depends on when it's released"];
     case "planned":
-      return [`Booked for pickup at ${s.legs[0]?.from.name ?? "origin"}`, arrival(s, trusted)];
+      return [`Booked for pickup at ${s.legs[0]?.from.name ?? "origin"}`, arrival(s, now, trusted)];
     case "in_transit":
     case "at_port": {
       const stale = isStale(s, now);
-      // A quiet operator makes the summary "Needs review", so it gives no firm on-time answer,
-      // unless a known delay (a fact) is behind the prediction.
-      const firm = !stale || trusted !== undefined;
       const step = nextStep(s);
       return [
         where(s, status),
-        arrival(s, trusted, firm),
+        arrival(s, now, trusted),
         ...(stale ? [`No operator update for ${hoursSinceUpdate(s, now)}h`] : []),
         ...(step ? [`Next: ${upcoming(step.milestone, step.leg, s)}`] : []),
       ];
@@ -81,9 +78,12 @@ function where(s: Shipment, status: "in_transit" | "at_port"): string {
   return `${how} from ${leg.from.name} to ${leg.to.name}`;
 }
 
-/** When it arrives, worded by who says so, and when `firm`, whether that's on time. */
-function arrival(s: Shipment, trusted: EtaPrediction | undefined, firm = true): string {
-  const words = firm ? latenessWords(getEtaStatus(s, trusted).status) : undefined;
+/**
+ * When it arrives, worded by who says so, and whether that's on time when the data says so.
+ * A quiet operator gives no on-time answer (see `getEtaStatus`), so the words are left out.
+ */
+function arrival(s: Shipment, now: Date, trusted: EtaPrediction | undefined): string {
+  const words = latenessWords(getEtaStatus(s, now, trusted).status);
   const lateness = words ? `, ${words}` : "";
   if (trusted) return `AI predicts arrival ${formatDayRange(trusted.earliest, trusted.latest)}${lateness}`;
   const day = formatDay(s.operatorEta.date);

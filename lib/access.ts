@@ -23,3 +23,12 @@ export function canView(user: User, shipment: Shipment): boolean {
 export function visibleShipments(user: User, shipments: Shipment[]): Shipment[] {
   return shipments.filter((shipment) => canView(user, shipment));
 }
+
+/**
+ * The shipment with this id, if this user may see it. A shipment outside their perimeter is
+ * `undefined` too, so the page says "not found" and never reveals that the id exists.
+ */
+export function findVisibleShipment(user: User, shipments: Shipment[], id: string): Shipment | undefined {
+  const shipment = shipments.find((s) => s.id === id);
+  return shipment && canView(user, shipment) ? shipment : undefined;
+}

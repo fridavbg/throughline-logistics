@@ -1,0 +1,64 @@
+.panel {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.heading {
+  font-size: var(--text-lg);
+}
+
+.empty {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.message {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.channel {
+  font-family: var(--font-mono);
+}
+
+// The message exactly as received: monospace, wrapped so long lines never scroll the page.
+.original {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+// AI output: a dashed violet edge, like other longer AI blocks (DESIGN §6).
+.reading {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+  padding-left: var(--space-3);
+  border-left: 2px dashed var(--ai-accent);
+  font-size: var(--text-sm);
+}
