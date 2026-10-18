@@ -28,6 +28,12 @@ describe("normalizeCorvala", () => {
     expect(event.normalizedTo).toBeNull();
     expect(event.confidence).toBe(0);
   });
+
+  it("rejects a time that isn't a date, with a clear message", () => {
+    expect(() => normalizeCorvala({ shipment_ref: "SHP-1042", status_code: 10, ts: "yesterday" })).toThrow(
+      'Corvala sent a time that isn\'t a valid date: "yesterday"',
+    );
+  });
 });
 
 describe("normalizeSaltwren", () => {
@@ -55,6 +61,13 @@ describe("normalizeSaltwren", () => {
   it("rejects a line that isn't in Saltwren's format, naming the line", () => {
     expect(() => normalizeSaltwren("SHP-1042|DEP")).toThrow('Not a Saltwren event line: "SHP-1042|DEP"');
   });
+
+  it.each(["202613010000", "202602300000", "202610182500"])(
+    "rejects an impossible time %s instead of passing it on",
+    (time) => {
+      expect(() => normalizeSaltwren(`SHP-1042|DEP|ESVLC|${time}`)).toThrow("Saltwren sent an impossible time");
+    },
+  );
 });
 
 describe("normalizeQuickfern", () => {
@@ -73,6 +86,7 @@ describe("normalizeQuickfern", () => {
     ["Collected at Zaragoza Warehouse", "picked_up"],
     ["On the way to Murcia", "in_transit"],
     ["Out for delivery", "in_transit"],
+    ["Picked up, out for delivery", "in_transit"],
   ])("reads %j as %s", (update, milestone) => {
     expect(read(update).normalizedTo).toBe(milestone);
   });
@@ -82,11 +96,19 @@ describe("normalizeQuickfern", () => {
     "Delivery attempted, nobody home",
     "Couldn't deliver, will retry",
     "Pickup failed",
+    "Undelivered, returning to depot",
+    "Returned to sender",
   ])("never reads a failure as the milestone: %j", (update) => {
     const event = read(update);
 
     expect(event.normalizedTo).toBeNull();
     expect(event.confidence).toBeLessThan(0.6);
+  });
+
+  it("rejects a time that isn't a date, with a clear message", () => {
+    expect(() => normalizeQuickfern({ ref: "SHP-1047", update: "Delivered", time: "soon" })).toThrow(
+      'Quickfern sent a time that isn\'t a valid date: "soon"',
+    );
   });
 
   it("turns text it can't read into null with low confidence", () => {

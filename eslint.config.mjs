@@ -33,7 +33,7 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             {
-              group: ["@/data/raw", "@/data/raw/*"],
+              group: ["@/data/raw", "@/data/raw/*", "**/data/raw", "**/data/raw/*"],
               message: "Components never read raw operator payloads: use the normalized shipments.",
             },
           ],

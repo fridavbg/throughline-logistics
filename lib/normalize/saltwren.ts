@@ -15,8 +15,11 @@ const CODES: Record<string, MilestoneType> = {
 // Reference | event code | port code | time, e.g. SHP-1042|DEP|ESVLC|202610180630
 const LINE_SHAPE = /^[^|]+\|[A-Z]{3}\|[A-Z]{5}\|\d{12}$/;
 
-/** Turns `202610180630` into `2026-10-18T06:30:00.000Z`. */
-function parseEdiTime(value: string): string {
+/**
+ * Turns `202610180630` into `2026-10-18T06:30:00.000Z`. Rejects impossible dates such as
+ * month 13 or 30 February, which the date parser would otherwise accept or roll over.
+ */
+function parseEdiTime(value: string, line: string): string {
   const [year, month, day, hour, minute] = [
     value.slice(0, 4),
     value.slice(4, 6),
@@ -24,7 +27,12 @@ function parseEdiTime(value: string): string {
     value.slice(8, 10),
     value.slice(10, 12),
   ];
-  return `${year}-${month}-${day}T${hour}:${minute}:00.000Z`;
+  const iso = `${year}-${month}-${day}T${hour}:${minute}:00.000Z`;
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms) || new Date(ms).toISOString() !== iso) {
+    throw new Error(`Saltwren sent an impossible time "${value}" in "${line}"`);
+  }
+  return iso;
 }
 
 /**
@@ -42,7 +50,7 @@ export function normalizeSaltwren(line: string): NormalizedEvent {
     shipmentId: ref,
     event: {
       operatorId: "op-saltwren",
-      receivedAt: parseEdiTime(time),
+      receivedAt: parseEdiTime(time, line),
       channel: "edi",
       original: line,
       normalizedTo: milestone,

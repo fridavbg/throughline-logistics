@@ -2,6 +2,7 @@
  * Corvala Transport (road): JSON with numeric status codes and ISO timestamps.
  * Example: `{ "shipment_ref": "SHP-1042", "status_code": 30, "ts": "2026-10-17T08:15:00+02:00" }`
  */
+import { parseOperatorTime } from "@/lib/normalize/parseTime";
 import type { MilestoneType, NormalizedEvent } from "@/lib/types";
 
 /** One status message as Corvala sends it. */
@@ -23,7 +24,7 @@ export function normalizeCorvala(payload: CorvalaPayload): NormalizedEvent {
     shipmentId: payload.shipment_ref,
     event: {
       operatorId: "op-corvala",
-      receivedAt: new Date(payload.ts).toISOString(),
+      receivedAt: parseOperatorTime(payload.ts, "Corvala"),
       channel: "api",
       original: JSON.stringify(payload),
       normalizedTo: milestone,
