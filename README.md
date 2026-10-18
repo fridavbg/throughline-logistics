@@ -1,5 +1,7 @@
 # Throughline — Shipment Tracking Prototype
 
+[![CI](https://github.com/fridavbg/throughline-logistics/actions/workflows/ci.yml/badge.svg)](https://github.com/fridavbg/throughline-logistics/actions/workflows/ci.yml)
+
 One view of every shipment across sites, logistics operators and transport modes,
 with AI that predicts delays, ranks what needs attention and drafts the follow-up.
 
