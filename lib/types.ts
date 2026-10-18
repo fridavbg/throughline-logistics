@@ -35,10 +35,11 @@ export type ShipmentStatus =
   | "delivered";
 
 /**
- * Whether the shipment will arrive when promised.
+ * Whether the shipment will arrive when promised. `unknown` when the data can't give a firm
+ * answer: customs is holding it, or a date can't be read.
  * Separate from {@link DataSource}: one says how sure we are, this says how it's going.
  */
-export type EtaStatus = "on_time" | "at_risk" | "late";
+export type EtaStatus = "on_time" | "at_risk" | "late" | "unknown";
 
 /**
  * An {@link EtaStatus} together with whose ETA it was judged from, so the UI can say who

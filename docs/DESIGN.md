@@ -82,9 +82,10 @@ Pill with icon + label. Two separate sets, never merged into one badge:
   by mode, info) · `At port` (anchor, info) · `Customs hold` (shield-alert, red) ·
   `Delivered` (package-check, green). Problems such as incidents are exceptions, not a status.
 - **`EtaStatus`** (will it make it): `On time` (check-circle, green) · `At risk`
-  (clock-alert, amber) · `Late` (alert-triangle, red).
+  (clock-alert, amber) · `Late` (alert-triangle, red) · `ETA unknown` (circle-help, neutral)
+  when the data gives no firm answer (customs hold, unreadable date).
   Customers see the same tones and icons with plainer words: `On time` · `Up to a day late` ·
-  `More than a day late`, matching the AI summary. "At risk" stays an ops (triage) term,
+  `More than a day late` · `ETA unknown`, matching the AI summary. "At risk" stays an ops (triage) term,
   since a customer can read it as a risk to the goods.
 
 ### SourceTag

@@ -4,6 +4,7 @@ import { customers, users } from "@/data/seed";
 import { rankExceptions } from "@/lib/ai/triage";
 import { visibleShipments } from "@/lib/access";
 import { countByEta, customerAlerts, customerShipments, escalationAlerts } from "@/lib/customer";
+import { getEtaStatus } from "@/lib/derived";
 import { daysAgo, getNow } from "@/lib/time";
 import type { Shipment } from "@/lib/types";
 
@@ -53,9 +54,25 @@ describe("customerShipments", () => {
 
 describe("countByEta", () => {
   it("counts active shipments by ETA status and deliveries apart", () => {
-    expect(countByEta(ostrel)).toEqual({ on_time: 1, at_risk: 1, late: 1, delivered: 0 });
+    expect(countByEta(ostrel)).toEqual({ on_time: 1, at_risk: 1, late: 1, unknown: 0, delivered: 0 });
     const views = customerShipments([deliveredAt("SHP-1044", daysAgo(2)), ...all.slice(0, 1)], NOW);
-    expect(countByEta(views)).toEqual({ on_time: 0, at_risk: 0, late: 1, delivered: 1 });
+    expect(countByEta(views)).toEqual({ on_time: 0, at_risk: 0, late: 1, unknown: 0, delivered: 1 });
+  });
+});
+
+describe("customerShipments: unknown ETA", () => {
+  const unreadable = all.map((s) => (s.id === "SHP-1048" ? { ...s, operatorEta: { ...s.operatorEta, date: "x" } } : s));
+  const views = customerShipments(unreadable, NOW);
+
+  it("counts an unreadable ETA as unknown, not late", () => {
+    expect(views.find((v) => v.shipment.id === "SHP-1048")?.eta.status).toBe("unknown");
+  });
+
+  it("sorts unknown after late and at risk, before on time", () => {
+    const statuses = views.filter((v) => v.delivery === undefined).map((v) => v.eta.status);
+    const order = ["late", "at_risk", "unknown", "on_time"];
+    expect(statuses).toEqual([...statuses].sort((a, b) => order.indexOf(a) - order.indexOf(b)));
+    expect(statuses).toContain("unknown");
   });
 });
 
@@ -77,6 +94,16 @@ describe("customerAlerts", () => {
   it("never alerts below 0.8: SHP-1046 (0.75) stays an ops matter", () => {
     const ids = customerAlerts(customerShipments(all, NOW)).map((a) => a.shipmentId);
     expect(ids).toEqual(["SHP-1042"]);
+  });
+
+  it("never alerts when the AI's ETA status is unknown, even at High confidence", () => {
+    const unknown = ostrel.map((v) => {
+      if (v.shipment.id !== "SHP-1042" || !v.prediction) return v;
+      const prediction = { ...v.prediction, latest: "not a date" };
+      return { ...v, prediction, eta: getEtaStatus(v.shipment, prediction) };
+    });
+    expect(unknown.find((v) => v.shipment.id === "SHP-1042")?.eta.status).toBe("unknown");
+    expect(customerAlerts(unknown)).toEqual([]);
   });
 
   it("dates the alert when the late step was reported, never in the future", () => {

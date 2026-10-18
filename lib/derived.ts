@@ -8,6 +8,7 @@ import { legInProgress } from "@/lib/shipments";
 import { HOUR_MS } from "@/lib/time";
 import type {
   EtaPrediction,
+  EtaStatus,
   EtaStatusWithSource,
   Leg,
   Milestone,
@@ -153,17 +154,43 @@ export function isStale(s: Shipment, now: Date): boolean {
  * `at_risk`, more is `late`.
  *
  * The prediction is optional: without one, the operator's ETA decides.
+ *
+ * `unknown` when there is no firm answer: during a customs hold, since the release time is
+ * unknown, and when either date can't be read.
  */
 export function getEtaStatus(s: Shipment, prediction?: EtaPrediction): EtaStatusWithSource {
   const usePrediction = prediction !== undefined && prediction.confidence >= REVIEW_BELOW;
   const best = usePrediction
     ? { date: prediction.latest, source: prediction.source }
     : s.operatorEta;
+  if (getShipmentStatus(s) === "customs_hold") return { status: "unknown", source: best.source };
 
   const hoursAfterPromise = (Date.parse(best.date) - Date.parse(s.plannedEta)) / HOUR_MS;
+  // An unreadable date gives NaN, which fails every comparison below.
+  if (Number.isNaN(hoursAfterPromise)) return { status: "unknown", source: best.source };
   const status =
     hoursAfterPromise <= 0 ? "on_time" : hoursAfterPromise <= LATE_AFTER_HOURS ? "at_risk" : "late";
   return { status, source: best.source };
+}
+
+/**
+ * Whether an ETA status is a delay to report. `unknown` isn't one: there is no firm answer,
+ * so neither an ops delay exception nor a customer alert may come from it.
+ */
+export function isDelayed(status: EtaStatus): boolean {
+  switch (status) {
+    case "at_risk":
+    case "late":
+      return true;
+    case "on_time":
+    case "unknown":
+      return false;
+    default: {
+      // Adding an ETA status without deciding here whether it's a delay fails to compile.
+      const unhandled: never = status;
+      throw new Error(`Unhandled ETA status: ${String(unhandled)}`);
+    }
+  }
 }
 
 /**

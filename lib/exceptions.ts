@@ -6,7 +6,7 @@
 import { HIGH_CONFIDENCE } from "@/lib/ai/confidence";
 import { predictEta } from "@/lib/ai/eta";
 import { FACTS_CONFIDENCE } from "@/lib/ai/summarize";
-import { getEtaStatus, getFurthestStep, getLastUpdateAt, getShipmentStatus, isStale, STALE_AFTER_HOURS } from "@/lib/derived";
+import { getEtaStatus, getFurthestStep, getLastUpdateAt, getShipmentStatus, isDelayed, isStale, STALE_AFTER_HOURS } from "@/lib/derived";
 import { MIN_CONFIDENCE_TO_APPLY } from "@/lib/shipments";
 import { HOUR_MS } from "@/lib/time";
 import type { DetectedException, DocumentType, ExceptionType, NextAction, Severity, Shipment } from "@/lib/types";
@@ -120,7 +120,7 @@ function delay(s: Shipment, now: Date): DetectedException | undefined {
   if (status === "delivered" || status === "customs_hold") return undefined;
   const prediction = predictEta(s, now);
   const eta = getEtaStatus(s, prediction);
-  if (eta.status === "on_time") return undefined;
+  if (!isDelayed(eta.status)) return undefined;
 
   if (eta.source === "ai_predicted" && prediction) {
     const detectedAt = getFurthestStep(s)?.milestone.at ?? getLastUpdateAt(s);

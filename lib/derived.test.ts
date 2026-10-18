@@ -254,6 +254,36 @@ describe("getEtaStatus", () => {
     const s = shipment([], { operatorEta: { date: promised, source: "estimated" }, plannedEta: promised });
     expect(getEtaStatus(s)).toEqual({ status: "on_time", source: "estimated" });
   });
+
+  it("is unknown during a customs hold, even when the operator's ETA keeps the promise", () => {
+    const held = shipment([leg(1, [["customs_hold", "2026-10-13T10:00:00Z"], ["customs_cleared", null]])], {
+      operatorEta: { date: promised, source: "confirmed" },
+      plannedEta: promised,
+    });
+    expect(getEtaStatus(held)).toEqual({ status: "unknown", source: "confirmed" });
+  });
+
+  it("judges again once customs clears it", () => {
+    const cleared = shipment([leg(1, [["customs_hold", "2026-10-13T10:00:00Z"], ["customs_cleared", "2026-10-13T15:00:00Z"]])], {
+      operatorEta: { date: promised, source: "confirmed" },
+      plannedEta: promised,
+    });
+    expect(getEtaStatus(cleared).status).toBe("on_time");
+  });
+
+  it("is unknown, not late, when the operator's ETA can't be read", () => {
+    expect(getEtaStatus(withOperatorEta("not a date"))).toEqual({ status: "unknown", source: "confirmed" });
+  });
+
+  it("is unknown when the promised arrival can't be read", () => {
+    const s = shipment([], { operatorEta: { date: promised, source: "confirmed" }, plannedEta: "" });
+    expect(getEtaStatus(s).status).toBe("unknown");
+  });
+
+  it("is unknown when the prediction it uses can't be read, and says it's AI", () => {
+    const s = withOperatorEta(promised);
+    expect(getEtaStatus(s, prediction("not a date", 0.9))).toEqual({ status: "unknown", source: "ai_predicted" });
+  });
 });
 
 describe("isOverdue", () => {
