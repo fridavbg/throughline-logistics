@@ -1,17 +1,17 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { RoleGate } from "@/components/layout/RoleGate";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
-import { VisibleShipments } from "@/components/shipment/VisibleShipments";
+import { AttentionInbox } from "@/components/shipment/AttentionInbox";
 
 /**
- * The ops home. For now a plain list of the persona's shipments; the attention inbox (F2)
- * replaces it. Next.js requires a default export for pages, so this is an exception to named exports.
+ * The ops home, the attention inbox (F2). Next.js requires a default export for pages, so
+ * this is an exception to named exports.
  */
 export default function OpsHome() {
   return (
-    <AppShell title="Shipments" actions={<RoleSwitcher />}>
+    <AppShell title="Attention" actions={<RoleSwitcher />}>
       <RoleGate role="ops">
-        <VisibleShipments />
+        <AttentionInbox />
       </RoleGate>
     </AppShell>
   );
