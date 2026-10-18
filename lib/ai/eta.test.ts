@@ -114,7 +114,7 @@ describe("predictEta: a known delay", () => {
   it("never drops below 0.6, so a delay that has happened still counts", () => {
     const s = shipment([departedLate(26), roadAfter], { requiresCustoms: true, rawEvents: [rawEvent(30)] });
     expect(predictEta(s, NOW)?.confidence).toBe(0.6);
-    expect(getEtaStatus(s, predictEta(s, NOW))).toEqual({ status: "late", source: "ai_predicted" });
+    expect(getEtaStatus(s, NOW, predictEta(s, NOW))).toEqual({ status: "late", source: "ai_predicted" });
   });
 
   it("rounds the hours in the reason", () => {
@@ -125,7 +125,7 @@ describe("predictEta: a known delay", () => {
 
   it("makes the shipment late by the AI's prediction, not the operator's ETA", () => {
     const s = shipment([departedLate(26), roadAfter]);
-    expect(getEtaStatus(s, predictEta(s, NOW))).toEqual({ status: "late", source: "ai_predicted" });
+    expect(getEtaStatus(s, NOW, predictEta(s, NOW))).toEqual({ status: "late", source: "ai_predicted" });
   });
 });
 
@@ -142,8 +142,8 @@ describe("predictEta: a stale shipment with no known delay", () => {
     });
   });
 
-  it("doesn't decide lateness: below 0.6 the operator's ETA still counts", () => {
-    expect(getEtaStatus(s, predictEta(s, NOW))).toEqual({ status: "on_time", source: "estimated" });
+  it("doesn't decide lateness, and the quiet operator can't confirm on time either", () => {
+    expect(getEtaStatus(s, NOW, predictEta(s, NOW))).toEqual({ status: "unknown", source: "estimated" });
   });
 });
 

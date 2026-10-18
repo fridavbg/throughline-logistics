@@ -8,6 +8,7 @@ import {
   isOverdue,
   isStale,
 } from "@/lib/derived";
+import { getNow } from "@/lib/time";
 import type { EtaPrediction, Leg, MilestoneType, RawEventRef, Shipment, ShipmentException } from "@/lib/types";
 
 const port = { name: "Port of Valencia", country: "ES", kind: "port" } as const;
@@ -237,22 +238,22 @@ describe("getEtaStatus", () => {
     ["2026-10-26T00:00:00.000Z", "at_risk"],
     ["2026-10-26T00:01:00.000Z", "late"],
   ])("operator ETA %s is %s", (eta, status) => {
-    expect(getEtaStatus(withOperatorEta(eta))).toEqual({ status, source: "confirmed" });
+    expect(getEtaStatus(withOperatorEta(eta), getNow())).toEqual({ status, source: "confirmed" });
   });
 
   it("uses the operator ETA when the prediction is below 0.6 confidence", () => {
     const s = withOperatorEta(promised);
-    expect(getEtaStatus(s, prediction("2026-10-28T00:00:00.000Z", 0.59))).toEqual({ status: "on_time", source: "confirmed" });
+    expect(getEtaStatus(s, getNow(), prediction("2026-10-28T00:00:00.000Z", 0.59))).toEqual({ status: "on_time", source: "confirmed" });
   });
 
   it("uses the prediction from 0.6 confidence, and says it's AI", () => {
     const s = withOperatorEta(promised);
-    expect(getEtaStatus(s, prediction("2026-10-28T00:00:00.000Z", 0.6))).toEqual({ status: "late", source: "ai_predicted" });
+    expect(getEtaStatus(s, getNow(), prediction("2026-10-28T00:00:00.000Z", 0.6))).toEqual({ status: "late", source: "ai_predicted" });
   });
 
   it("keeps the operator's own source when there is no prediction", () => {
     const s = shipment([], { operatorEta: { date: promised, source: "estimated" }, plannedEta: promised });
-    expect(getEtaStatus(s)).toEqual({ status: "on_time", source: "estimated" });
+    expect(getEtaStatus(s, getNow())).toEqual({ status: "on_time", source: "estimated" });
   });
 
   it("is unknown during a customs hold, even when the operator's ETA keeps the promise", () => {
@@ -260,7 +261,7 @@ describe("getEtaStatus", () => {
       operatorEta: { date: promised, source: "confirmed" },
       plannedEta: promised,
     });
-    expect(getEtaStatus(held)).toEqual({ status: "unknown", source: "confirmed" });
+    expect(getEtaStatus(held, getNow())).toEqual({ status: "unknown", source: "confirmed" });
   });
 
   it("judges again once customs clears it", () => {
@@ -268,21 +269,49 @@ describe("getEtaStatus", () => {
       operatorEta: { date: promised, source: "confirmed" },
       plannedEta: promised,
     });
-    expect(getEtaStatus(cleared).status).toBe("on_time");
+    expect(getEtaStatus(cleared, getNow()).status).toBe("on_time");
   });
 
   it("is unknown, not late, when the operator's ETA can't be read", () => {
-    expect(getEtaStatus(withOperatorEta("not a date"))).toEqual({ status: "unknown", source: "confirmed" });
+    expect(getEtaStatus(withOperatorEta("not a date"), getNow())).toEqual({ status: "unknown", source: "confirmed" });
   });
 
   it("is unknown when the promised arrival can't be read", () => {
     const s = shipment([], { operatorEta: { date: promised, source: "confirmed" }, plannedEta: "" });
-    expect(getEtaStatus(s).status).toBe("unknown");
+    expect(getEtaStatus(s, getNow()).status).toBe("unknown");
+  });
+
+  describe("when the operator has gone quiet (stale)", () => {
+    // Picked up, last heard from at `lastUpdate`; the demo clock is 2026-10-21T08:00Z.
+    const quiet = (eta: string, lastUpdate = "2026-10-20T00:00:00.000Z") =>
+      shipment([road("2026-10-19T08:00:00Z", null, null)], {
+        rawEvents: [rawEvent(lastUpdate)],
+        operatorEta: { date: eta, source: "estimated" },
+        plannedEta: promised,
+      });
+
+    it("makes no on-time claim from the operator's ETA alone", () => {
+      expect(getEtaStatus(quiet(promised), getNow())).toEqual({ status: "unknown", source: "estimated" });
+    });
+
+    it("keeps a delay the operator reported: silence doesn't make it less late", () => {
+      expect(getEtaStatus(quiet("2026-10-26T00:01:00.000Z"), getNow()).status).toBe("late");
+      expect(getEtaStatus(quiet("2026-10-25T06:00:00.000Z"), getNow()).status).toBe("at_risk");
+    });
+
+    it("still counts a firm prediction, which comes from a delay that happened", () => {
+      const firm = prediction(promised, 0.6);
+      expect(getEtaStatus(quiet(promised), getNow(), firm)).toEqual({ status: "on_time", source: "ai_predicted" });
+    });
+
+    it("judges as usual at exactly 24h, which isn't stale yet", () => {
+      expect(getEtaStatus(quiet(promised, "2026-10-20T08:00:00.000Z"), getNow()).status).toBe("on_time");
+    });
   });
 
   it("is unknown when the prediction it uses can't be read, and says it's AI", () => {
     const s = withOperatorEta(promised);
-    expect(getEtaStatus(s, prediction("not a date", 0.9))).toEqual({ status: "unknown", source: "ai_predicted" });
+    expect(getEtaStatus(s, getNow(), prediction("not a date", 0.9))).toEqual({ status: "unknown", source: "ai_predicted" });
   });
 });
 

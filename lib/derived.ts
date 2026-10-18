@@ -156,9 +156,12 @@ export function isStale(s: Shipment, now: Date): boolean {
  * The prediction is optional: without one, the operator's ETA decides.
  *
  * `unknown` when there is no firm answer: during a customs hold, since the release time is
- * unknown, and when either date can't be read.
+ * unknown; when either date can't be read; and when a stale shipment would be `on_time` by the
+ * operator's ETA alone. An operator who has gone quiet can't confirm that it's on time, but a
+ * delay they reported still stands. A firm prediction on a stale shipment comes from a delay
+ * that has happened, so it still counts.
  */
-export function getEtaStatus(s: Shipment, prediction?: EtaPrediction): EtaStatusWithSource {
+export function getEtaStatus(s: Shipment, now: Date, prediction?: EtaPrediction): EtaStatusWithSource {
   const usePrediction = prediction !== undefined && prediction.confidence >= REVIEW_BELOW;
   const best = usePrediction
     ? { date: prediction.latest, source: prediction.source }
@@ -170,6 +173,7 @@ export function getEtaStatus(s: Shipment, prediction?: EtaPrediction): EtaStatus
   if (Number.isNaN(hoursAfterPromise)) return { status: "unknown", source: best.source };
   const status =
     hoursAfterPromise <= 0 ? "on_time" : hoursAfterPromise <= LATE_AFTER_HOURS ? "at_risk" : "late";
+  if (status === "on_time" && !usePrediction && isStale(s, now)) return { status: "unknown", source: best.source };
   return { status, source: best.source };
 }
 

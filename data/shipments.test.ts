@@ -187,14 +187,14 @@ describe("seed scenarios", () => {
 
   it("has SHP-1049 as the only shipment at risk by its operator ETA", () => {
     const delayed = shipments
-      .filter((s) => ["at_risk", "late"].includes(getEtaStatus(s).status))
+      .filter((s) => ["at_risk", "late"].includes(getEtaStatus(s, DEMO_NOW).status))
       .map((s) => s.id);
     expect(delayed).toEqual(["SHP-1049"]);
-    expect(getEtaStatus(get("SHP-1049"))).toEqual({ status: "at_risk", source: "estimated" });
+    expect(getEtaStatus(get("SHP-1049"), DEMO_NOW)).toEqual({ status: "at_risk", source: "estimated" });
   });
 
   it("SHP-1043: no on-time answer while customs holds it (demo step 2)", () => {
-    expect(getEtaStatus(get("SHP-1043")).status).toBe("unknown");
+    expect(getEtaStatus(get("SHP-1043"), DEMO_NOW).status).toBe("unknown");
   });
 
   it("predicts an ETA only for the delayed and the stale shipments", () => {
@@ -207,22 +207,22 @@ describe("seed scenarios", () => {
     const prediction = predictEta(s, DEMO_NOW);
     expect(prediction?.confidence).toBe(0.85);
     expect(prediction?.reason).toBe("Vessel departed 26h late from Port of Valencia");
-    expect(getEtaStatus(s, prediction)).toEqual({ status: "late", source: "ai_predicted" });
+    expect(getEtaStatus(s, DEMO_NOW, prediction)).toEqual({ status: "late", source: "ai_predicted" });
   });
 
   it("SHP-1046: at risk by the AI before the operator's ETA moves, Medium because customs is ahead", () => {
     const s = get("SHP-1046");
     const prediction = predictEta(s, DEMO_NOW);
     expect(prediction?.confidence).toBe(0.75);
-    expect(getEtaStatus(s)).toEqual({ status: "on_time", source: "estimated" });
-    expect(getEtaStatus(s, prediction)).toEqual({ status: "at_risk", source: "ai_predicted" });
+    expect(getEtaStatus(s, DEMO_NOW)).toEqual({ status: "on_time", source: "estimated" });
+    expect(getEtaStatus(s, DEMO_NOW, prediction)).toEqual({ status: "at_risk", source: "ai_predicted" });
   });
 
-  it("SHP-1045: the stale shipment's prediction needs review, so it doesn't decide lateness", () => {
+  it("SHP-1045: the stale shipment's prediction needs review, and a quiet operator can't confirm on time", () => {
     const s = get("SHP-1045");
     const prediction = predictEta(s, DEMO_NOW);
     expect(prediction?.confidence).toBe(0.5);
-    expect(getEtaStatus(s, prediction)).toEqual({ status: "on_time", source: "estimated" });
+    expect(getEtaStatus(s, DEMO_NOW, prediction)).toEqual({ status: "unknown", source: "estimated" });
   });
 
   it("customs steps only appear on shipments leaving the EU", () => {

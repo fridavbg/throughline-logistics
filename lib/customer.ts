@@ -53,7 +53,11 @@ export function customerShipments(shipments: Shipment[], now: Date): CustomerShi
     .sort(byUrgency);
 }
 
-function toCustomerShipment(shipment: Shipment, now: Date): CustomerShipment {
+/**
+ * One shipment with its status, ETA status, firm prediction, summary and delivery. Also used by
+ * the shared detail page (F5), so ops and customers see the same arrival for a shipment.
+ */
+export function toCustomerShipment(shipment: Shipment, now: Date): CustomerShipment {
   const predicted = predictEta(shipment, now);
   const prediction = predicted && predicted.confidence >= REVIEW_BELOW ? predicted : undefined;
   const status = getShipmentStatus(shipment);
@@ -61,7 +65,7 @@ function toCustomerShipment(shipment: Shipment, now: Date): CustomerShipment {
   return {
     shipment,
     status,
-    eta: getEtaStatus(shipment, prediction),
+    eta: getEtaStatus(shipment, now, prediction),
     prediction,
     summary: summarizeShipment(shipment, now),
     delivery: status === "delivered" && step?.at ? { at: step.at, source: step.source } : undefined,

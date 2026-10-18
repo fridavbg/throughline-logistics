@@ -119,7 +119,7 @@ function delay(s: Shipment, now: Date): DetectedException | undefined {
   const status = getShipmentStatus(s);
   if (status === "delivered" || status === "customs_hold") return undefined;
   const prediction = predictEta(s, now);
-  const eta = getEtaStatus(s, prediction);
+  const eta = getEtaStatus(s, now, prediction);
   if (!isDelayed(eta.status)) return undefined;
 
   if (eta.source === "ai_predicted" && prediction) {
