@@ -180,8 +180,20 @@ export type ShipmentException = {
   respondBy: string;            // detectedAt + 30 min (critical) or 2 h (warning)
   impact: string;               // "ETA +2 days"
   priorityScore: number;        // 0–100, from triage
-  priorityReason: string;
+  priorityReason: string;       // "Overdue by 10 min · Critical: customs hold · Key customer"
   suggestedAction: NextAction;
+  actionReason: string;         // "Customs needs the packing list"
+  confidence: number;           // 0–1: the prediction's for an AI delay, else 0.95
+};
+
+export type DetectedException = Omit<ShipmentException, "priorityScore" | "priorityReason">;
+
+export type NotificationDraft = {  // A4: an ops user edits and approves; never sent automatically
+  exceptionId: string;
+  shipmentId: string;
+  customerId: string;
+  subject: string;
+  body: string;                 // facts from the shipment only
 };
 
 export type CustomerAlert = {
@@ -195,7 +207,7 @@ export type CustomerAlert = {
 };
 ```
 
-## 5. Derived values (pure functions in `lib/derived.ts`, `lib/access.ts`, `lib/customer.ts`, `lib/ai/eta.ts` and `lib/ai/summarize.ts`)
+## 5. Derived values (pure functions in `lib/derived.ts`, `lib/access.ts`, `lib/customer.ts`, `lib/exceptions.ts` and `lib/ai/`)
 | Function | Returns | Rule |
 |---|---|---|
 | `getShipmentStatus(s)` | `ShipmentStatus` | Derived, never stored: an unresolved `customs_hold` (no `customs_cleared` at or after it, by `at`) wins. Otherwise from the furthest completed milestone along the route (leg, then `plannedAt`), not the newest `at`: `at` is the receipt time, so a late report of a missed step would move the shipment backwards. `delivered` on an earlier leg means `at_port`; only on the last leg is the shipment `delivered`. No milestone done: `planned` |
@@ -209,6 +221,10 @@ export type CustomerAlert = {
 | `countByEta(views)` | `EtaCounts` | Active shipments by `etaStatus`, plus `delivered`; from the same list as the cards so they always match |
 | `customerAlerts(views)` | `CustomerAlert[]` | Only an AI prediction with confidence ≥ 0.8 that makes the shipment at risk or late (PRD §6); dated when the late step was reported. Newest first |
 | `isOverdue(e, now)` | `boolean` | `now > respondBy` |
+| `detectExceptions(s, now)` | `DetectedException[]` | A3 rules, one row per problem. `customs_hold`: unresolved hold, detected when reported; a missing required document is folded in (action `request_document`, else `contact_operator`). `missing_document`: required and missing, not held or delivered; detected `now` (documents carry no time). `stale`: `isStale`, detected at last update + 24h, `contact_operator`. `delay`: `getEtaStatus` at risk or late, not held or delivered; from an AI prediction it's detected at the furthest step and its action is `contact_operator` when confidence ≥ 0.8 (the customer was alerted) else `notify_customer`; from the operator ETA, `notify_customer`. `needs_review`: the latest raw event is unread or below 0.6, `review_update`. `incident`: never detected, nothing reports one yet. `respondBy` = `detectedAt` + 30 min (critical: hold, incident) or 2 h |
+| `rankExceptions(list, customers, now)` | `ShipmentException[]` | A3 triage. Weight = severity (critical 1, warning 0.6) × customer priority (key 1, standard 0.8). Overdue: score 90 + 10 × weight. Otherwise 89 × weight × urgency, urgency from 0.5 (just detected) to 1 (at the deadline). Highest first, then earliest deadline, then id |
+| `draftNotification(e, s, customer, now)` | `NotificationDraft \| undefined` | A4. Only when the action writes to the customer (`notify_customer`, `request_document`). Templates per type with shipment facts only: AI arrival "(our estimate)", operator "(the carrier's estimate)", a delay within the planned day in hours; a hold names the missing document and never a release date. None for `stale` and `needs_review` |
+| `escalationAlerts(exceptions, approvedIds, now)` | `CustomerAlert[]` | PRD §6: an overdue exception whose action writes to the customer and whose draft isn't approved gives "We're aware of an issue with SHP-1043 and are working on it.", dated at `respondBy` |
 | `getCurrentLeg(s)` | `Leg \| undefined` | The latest leg with a completed milestone, or the next leg once all its milestones are done, so a skipped operator report doesn't hold it back. First leg before departure, last leg once delivered; `undefined` only without legs |
 | `canView(user, s)` | `boolean` | Customer: `customerId` match. Ops: `siteIds === "all"` or `originSiteId` in `siteIds` |
 | `visibleShipments(user, list)` | `Shipment[]` | The shipments `canView` allows, in the same order |

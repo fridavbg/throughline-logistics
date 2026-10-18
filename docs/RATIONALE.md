@@ -73,6 +73,9 @@ inventing information. It's the first candidate for a next step.
 - Operators provide updates via API, EDI or email.
 - One customer and one origin site per shipment.
 - "Stale" = no update for 24h while in transit or at port.
+- Triage weights are starting values too (`lib/ai/triage.ts`): critical 1, warning 0.6; key
+  customer 1, standard 0.8. Overdue items get their own band (90–100), so they rank on top
+  whatever their weight.
 - Response targets (critical 30 min, warning 2 h) and the 0.8 alert threshold are starting
   values to be agreed with the operations team and tuned with real data.
 - ETA prediction values are starting values too (`lib/ai/eta.ts`): a delay under 1h is
@@ -91,6 +94,8 @@ inventing information. It's the first candidate for a next step.
 - Dates are shown in Spain's time zone for everyone (`formatDay` in `lib/time.ts`), so the
   server, the browser and tests agree on the day. A customer in the UK sees a Spanish date,
   which differs only around midnight; production would use the viewer's time zone.
+- Incidents (damage, accidents) aren't detected: no operator feed or field reports one yet, and
+  a signal isn't invented. The type, severity and draft exist for when a feed does.
 - No authentication: personas simulate access control.
 - Real-time updates are simulated with a demo panel.
 - No map view; the leg timeline answers "where is it?".
