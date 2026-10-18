@@ -72,6 +72,10 @@ inventing information. It's the first candidate for a next step.
 - No authentication: personas simulate access control.
 - Real-time updates are simulated with a demo panel.
 - No map view; the leg timeline answers "where is it?".
+- One time per operator message: `receivedAt` is used both as when a step happened
+  (milestone `at`) and as when we last heard from the operator (stale detection). Real
+  integrations would carry both: a message sent hours late, such as a batched email, would
+  then show the step at the right time without making the shipment look freshly updated.
 
 **Prioritised next steps**
 1. Real ingestion for the two highest-volume operators + normalization review queue.
