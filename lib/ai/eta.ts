@@ -5,6 +5,7 @@
  *
  * The numbers below are starting values, to be tuned against real lane data.
  */
+import { REVIEW_BELOW } from "@/lib/ai/confidence";
 import { getFurthestStep, getLastUpdateAt, getShipmentStatus, isStale } from "@/lib/derived";
 import { HOUR_MS } from "@/lib/time";
 import type { EtaPrediction, Leg, Milestone, Shipment } from "@/lib/types";
@@ -77,7 +78,9 @@ function delayPrediction(
   return {
     earliest: addHours(s.plannedEta, delayHours * (1 - RECOVERABLE_SHARE)),
     latest,
-    confidence: round2(confidence),
+    // Never below the review line: the delay has already happened, so the penalties only
+    // make any further delay uncertain. Below it, a known delay would show as on time.
+    confidence: round2(Math.max(confidence, REVIEW_BELOW)),
     reason: delayReason(step.milestone, step.leg, delayHours),
     source: "ai_predicted",
   };

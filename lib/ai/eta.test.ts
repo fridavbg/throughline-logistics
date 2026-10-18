@@ -108,7 +108,13 @@ describe("predictEta: a known delay", () => {
 
   it("is less confident when the operator has gone quiet", () => {
     const s = shipment([departedLate(26), roadAfter], { rawEvents: [rawEvent(30)] });
-    expect(predictEta(s, NOW)?.confidence).toBe(0.55);
+    expect(predictEta(s, NOW)?.confidence).toBe(0.6);
+  });
+
+  it("never drops below 0.6, so a delay that has happened still counts", () => {
+    const s = shipment([departedLate(26), roadAfter], { requiresCustoms: true, rawEvents: [rawEvent(30)] });
+    expect(predictEta(s, NOW)?.confidence).toBe(0.6);
+    expect(getEtaStatus(s, predictEta(s, NOW))).toEqual({ status: "late", source: "ai_predicted" });
   });
 
   it("rounds the hours in the reason", () => {
