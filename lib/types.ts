@@ -7,25 +7,32 @@
 // ---------- Shared ----------
 
 /**
- * Where a value comes from: confirmed by the operator, estimated by the operator,
- * or predicted by our AI. Every time and status in the UI shows one of these.
+ * Where an operator's own data comes from: confirmed or estimated by the operator.
+ * AI never writes operator data, so an AI value in an operator field doesn't compile.
  */
-export type DataSource = "confirmed" | "estimated" | "ai_predicted";
+export type OperatorSource = "confirmed" | "estimated";
+
+/**
+ * Where a value comes from: the operator, or a prediction by our AI.
+ * Every time and status in the UI shows one of these.
+ */
+export type DataSource = OperatorSource | "ai_predicted";
 
 /** How a leg travels. */
 export type Mode = "road" | "sea";
 
 /**
- * The shipment's state as shown in the UI. Worked out from its milestones, never stored.
- * Lateness is not a status: "at risk" and "late" live in {@link EtaStatus}.
+ * Where the shipment is, as shown in the UI. Worked out from its milestones, never stored.
+ * Lateness is not a status: "at risk" and "late" live in {@link EtaStatus}. Problems such
+ * as an incident aren't a status either: they are exceptions in the ops inbox
+ * ({@link ShipmentException}).
  */
 export type ShipmentStatus =
   | "planned"
   | "in_transit"
   | "at_port"
   | "customs_hold"
-  | "delivered"
-  | "exception";
+  | "delivered";
 
 /**
  * Whether the shipment will arrive when promised.
@@ -108,7 +115,7 @@ export type Milestone = {
   at: string | null;
   /** When it was supposed to happen. */
   plannedAt: string;
-  source: DataSource;
+  source: OperatorSource;
   /** The operator's original code or text, kept so ops can check our reading of it. */
   rawStatus?: string;
 };
@@ -125,10 +132,13 @@ export type Leg = {
   milestones: Milestone[];
 };
 
-/** An arrival time and who it comes from. */
+/**
+ * The operator's arrival time, either confirmed or estimated.
+ * AI predictions are a separate type ({@link EtaPrediction}) and never stored here.
+ */
 export type Eta = {
   date: string;
-  source: DataSource;
+  source: OperatorSource;
 };
 
 /** Paperwork that can travel with a shipment. A CMR is the consignment note for road transport. */
@@ -161,7 +171,8 @@ export type RawEventRef = {
 
 /**
  * A shipment from one origin site to one customer, made of legs in order of travel,
- * e.g. road → sea → road. Status, staleness and lateness are computed from it, not stored.
+ * e.g. road → sea → road. Status, staleness, lateness and the time of the last operator
+ * update are computed from it, not stored.
  */
 export type Shipment = {
   /** Shipment reference, e.g. "SHP-1042". */
@@ -178,10 +189,11 @@ export type Shipment = {
   operatorEta: Eta;
   /** The arrival time promised at booking. */
   plannedEta: string;
-  /** The latest operator update. Used to flag stale shipments. */
-  lastUpdateAt: string;
   documents: ShipmentDocument[];
-  /** Every operator message for this shipment, shown to ops for traceability. */
+  /**
+   * Every operator message for this shipment, shown to ops for traceability. The newest
+   * one is the shipment's last update, which is how stale shipments are found.
+   */
   rawEvents: RawEventRef[];
 };
 
