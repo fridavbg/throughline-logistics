@@ -1,0 +1,73 @@
+// Design tokens from docs/DESIGN.md, exposed as CSS custom properties.
+// Output once via globals.scss; components read them with var(--...), never @use this file.
+
+:root {
+  // ---------- Neutrals ----------
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eef1f4;
+  --color-border: #dde2e8;
+  --color-text: #14202e;
+  --color-text-muted: #5b6878;
+  --color-primary: #1e3a5f;
+  --color-focus: #2f6fed;
+
+  // ---------- Semantic (foreground + soft background) ----------
+  --status-ontime: #1f7a4d;
+  --status-ontime-bg: #e6f4ec;
+  --status-risk: #a15c00;
+  --status-risk-bg: #fdf1dc;
+  --status-incident: #b42318;
+  --status-incident-bg: #fde8e6;
+  --status-info: #2f5d8a;
+  --status-info-bg: #e7eff8;
+  --ai-accent: #6941c6;
+  --ai-accent-bg: #f1ecfb;
+
+  // ---------- Typography ----------
+  // --font-plex-sans / --font-plex-mono are set by next/font in app/layout.tsx.
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  // Fluid sizes scale linearly between 360px and 1280px viewports.
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: clamp(1.125rem, 1.0761rem + 0.2174vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.1522rem + 0.4348vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.3043rem + 0.8696vw, 2rem);
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --leading-body: 1.5;
+  --leading-heading: 1.2;
+
+  // ---------- Spacing (4px base) ----------
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  // ---------- Radius ----------
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  // ---------- Elevation (floating layers only; cards use a border) ----------
+  --shadow-pop: 0 4px 16px rgb(20 32 46 / 0.12);
+  --shadow-modal: 0 12px 40px rgb(20 32 46 / 0.2);
+
+  // ---------- Motion ----------
+  --duration-fast: 150ms;
+  --duration-panel: 200ms;
+
+  // ---------- Layout ----------
+  --content-max: 1280px;
+  --gutter: var(--space-4);
+  --touch-target: 44px;
+}

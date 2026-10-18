@@ -150,9 +150,13 @@ suggests commits, and may create GitHub issues and leave PR review comments (see
 - Read-only git is fine: `git status`, `git diff`, `git log`.
 - After each logical change, suggest:
   - the files that belong in the commit
-  - a Conventional Commit message: `type(scope): summary` in the imperative, ≤ 72 chars
+  - a Conventional Commit message: `type(scope): #<issue> summary` in the imperative,
+    ≤ 72 chars, e.g. `chore(deps): #1 add state, UI primitive and styling dependencies`
     (types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`), plus a short body
     explaining *why* when it isn't obvious
+  - a footer referencing the same issue: `Refs #<n>`. Use `Closes #<n>`
+    only in the PR description, so the issue closes when the PR merges, not on a
+    partial commit
   - a branch name if starting new work: `feat/<short-name>`, `fix/<short-name>`
 
 Allowed with `gh`:
