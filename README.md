@@ -17,6 +17,37 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
 5. Switch to **Morty (Ops, Terrassa)** → only Terrassa shipments are visible.
 6. Switch to **Summer (Customer, Ostrel Deutschland)** → the delay alert and AI-predicted ETA.
 
+## AI features
+The AI is simulated on purpose: deterministic rules in `lib/ai/`, no model calls. The same
+data and demo clock always give the same output. The point is how AI fits the product
+(labelling, confidence, a person in control), not model quality.
+
+| | Feature | What it does | Where you see it |
+|---|---|---|---|
+| A1 | Status normalization | Reads each operator's own codes and messages as one shared set of milestones, with a confidence | Timeline, original operator messages |
+| A2 | ETA prediction | Carries a known delay through to the arrival: a window, a confidence and the reason ("Vessel departed 26h late from Port of Valencia") | Customer cards, ETA block |
+| A3 | Exception triage | Finds what needs attention and ranks it by severity × customer priority × time left, saying why | Ops inbox |
+| A4 | Next action + draft | Suggests the next step and drafts the customer message; a person approves it | Ops inbox |
+| A5 | Shipment summary | A few plain points: where it is, when it arrives, what happens next | Customer cards |
+
+**Rules every AI output follows**
+- Marked with an `AI` label, a confidence level and a "Why?".
+- Confidence: High (≥ 0.8), Medium (0.6–0.8), and below 0.6 no firm answer ("Needs review"
+  for ops, "Awaiting update" for customers).
+- Never replaces operator data: the AI window sits below the operator's ETA, and every time
+  says where it comes from (confirmed, operator estimate, AI prediction).
+- Says only what the data supports: predictions are worded as predictions, and a customs hold
+  gets no release date.
+
+**What reaches the customer on its own**
+| Tier | Example | How |
+|---|---|---|
+| Automatic | Status, ETAs, AI prediction, summary | Shown in the portal straight away |
+| Automatic above 0.8 | Delay alert | Only with High confidence; below that it goes to ops instead |
+| Human-approved | Drafted messages | Never sent automatically. If ops misses the response target, the customer gets a neutral "We're aware of an issue…" |
+
+How each feature would work in production is in [Rationale §1](docs/RATIONALE.md).
+
 ## Run locally
 ```bash
 nvm use
