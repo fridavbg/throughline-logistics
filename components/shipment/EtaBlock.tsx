@@ -13,26 +13,44 @@ export type EtaBlockProps = {
   prediction?: EtaPrediction;
   /** Who reads it, for the ETA status and confidence words. */
   audience: User["role"];
+  /** Customs is holding the shipment: no release time is known, so no date is shown at all. */
+  onHold: boolean;
 };
 
 /**
- * The answer to "when does it arrive?": the operator's ETA with its source and the ETA
- * status, and when the AI predicts otherwise, a second row with its window, confidence
- * and reason (DESIGN §6, EtaBlock).
+ * The answer to "when does it arrive?": the operator's ETA with its source, and when the AI
+ * predicts otherwise, a second row with its window, confidence and reason (DESIGN §6, EtaBlock).
+ * The ETA status badge sits in the row whose ETA it was judged from, so a lateness the AI
+ * predicted carries the `AI` label and never reads as the operator's word.
  */
-export function EtaBlock({ operatorEta, eta, prediction, audience }: EtaBlockProps) {
+export function EtaBlock({ operatorEta, eta, prediction, audience, onHold }: EtaBlockProps) {
+  const badge = <EtaStatusBadge status={eta.status} audience={audience} />;
+  if (onHold) {
+    // Matches the AI summary: a date next to "ETA unknown" would contradict it.
+    return (
+      <div className={styles.etaBlock}>
+        <p className={styles.row}>
+          <span className={styles.held}>Arrival date depends on when it&apos;s released</span>
+          {badge}
+        </p>
+      </div>
+    );
+  }
+
+  const fromAi = eta.source === "ai_predicted" && prediction !== undefined;
   return (
     <div className={styles.etaBlock}>
       <div className={styles.row}>
         <span className={styles.date}>{formatDay(operatorEta.date)}</span>
         <SourceTag source={operatorEta.source} />
-        <EtaStatusBadge status={eta.status} audience={audience} />
+        {!fromAi && badge}
       </div>
       {prediction && (
         <div className={styles.prediction}>
           <p className={styles.row}>
             <AiLabel />
             <span className={styles.range}>{formatDayRange(prediction.earliest, prediction.latest)}</span>
+            {fromAi && badge}
             <ConfidenceMeter confidence={prediction.confidence} audience={audience} />
           </p>
           <p className={styles.reason}>{prediction.reason}</p>

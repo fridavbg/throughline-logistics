@@ -38,7 +38,13 @@ export function ShipmentCard({ view, now }: ShipmentCardProps) {
           <SourceTag source={delivery.source} />
         </p>
       ) : (
-        <EtaBlock operatorEta={shipment.operatorEta} eta={eta} prediction={prediction} audience="customer" />
+        <EtaBlock
+          operatorEta={shipment.operatorEta}
+          eta={eta}
+          prediction={prediction}
+          audience="customer"
+          onHold={status === "customs_hold"}
+        />
       )}
       <AiSummary summary={summary} audience="customer" />
       <ButtonLink href={`/shipments/${shipment.id}`} aria-label={`View details of ${shipment.id}`}>

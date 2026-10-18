@@ -93,7 +93,13 @@ export function ShipmentDetail({ id }: ShipmentDetailProps) {
             <SourceTag source={delivery.source} />
           </p>
         ) : (
-          <EtaBlock operatorEta={shipment.operatorEta} eta={eta} prediction={prediction} audience={user.role} />
+          <EtaBlock
+            operatorEta={shipment.operatorEta}
+            eta={eta}
+            prediction={prediction}
+            audience={user.role}
+            onHold={status === "customs_hold"}
+          />
         )}
       </header>
 
