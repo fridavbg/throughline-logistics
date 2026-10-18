@@ -17,6 +17,28 @@ export function getNow(): Date {
   return new Date(DEMO_NOW.getTime());
 }
 
+/** The time zone dates are shown in: Spain, where the demo clock is set. */
+export const DEMO_TIME_ZONE = "Europe/Madrid";
+
+// Intl with a fixed time zone instead of date-fns `format`, which uses the time zone of the
+// machine running the code: the server, the browser and CI could show different days.
+const dayFormat = new Intl.DateTimeFormat("en-GB", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  timeZone: DEMO_TIME_ZONE,
+});
+
+/**
+ * A date the way the UI shows it, e.g. `formatDay("2026-10-23T12:00:00Z")` → "Fri 23 Oct".
+ * An unreadable date gives "date unknown" instead of throwing, so one bad operator value
+ * can't break a whole page, and no date is made up.
+ */
+export function formatDay(iso: string): string {
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? "date unknown" : dayFormat.format(ms);
+}
+
 // Helpers for seed data: times relative to the demo clock, such as "updated 31 hours ago".
 // They add plain milliseconds instead of using date-fns `addDays`, because `addDays` keeps
 // the local clock time, so its result would depend on the timezone of the machine running
