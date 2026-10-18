@@ -192,7 +192,7 @@ export type CustomerAlert = {
 ## 5. Derived values (pure functions in `lib/derived.ts` and `lib/access.ts`)
 | Function | Returns | Rule |
 |---|---|---|
-| `getShipmentStatus(s)` | `ShipmentStatus` | Derived, never stored: from the latest completed milestone, newest by `at` (not list order). An unresolved `customs_hold` (no `customs_cleared` after it) wins. `delivered` on an earlier leg means `at_port`; only on the last leg is the shipment `delivered`. No milestone done: `planned` |
+| `getShipmentStatus(s)` | `ShipmentStatus` | Derived, never stored: an unresolved `customs_hold` (no `customs_cleared` at or after it, by `at`) wins. Otherwise from the furthest completed milestone along the route (leg, then `plannedAt`), not the newest `at`: `at` is the receipt time, so a late report of a missed step would move the shipment backwards. `delivered` on an earlier leg means `at_port`; only on the last leg is the shipment `delivered`. No milestone done: `planned` |
 | `getLastUpdateAt(s)` | `string \| null` | Newest `rawEvents[].receivedAt`; `null` when the operator hasn't reported yet. Computed, so a simulated event can't leave it behind |
 | `isStale(s, now)` | `boolean` | Status is `in_transit` or `at_port` and `now - getLastUpdateAt(s) > 24h` |
 | `getEtaStatus(s, prediction?)` | `EtaStatusWithSource` | Best available ETA = `prediction.latest` if confidence ≥ 0.6, else `operatorEta` (also when there is no prediction). Minus `plannedEta`: ≤ 0h `on_time`, ≤ 24h `at_risk`, > 24h `late`. `source` is `ai_predicted` when the prediction was used, else the operator ETA's source, so the UI can label who says it's late |

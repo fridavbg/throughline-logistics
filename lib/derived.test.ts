@@ -105,14 +105,23 @@ describe("getShipmentStatus", () => {
     expect(getShipmentStatus(s)).toBe("customs_hold");
   });
 
-  it("goes by when steps happened, not the order they are listed in", () => {
+  it("goes by the route, not the order steps are listed in", () => {
     const inOrder = leg(1, [["arrived", "2026-10-13T08:00:00Z"], ["discharged", "2026-10-13T12:00:00Z"], ["picked_up", "2026-10-14T08:00:00Z"]]);
     const shuffled = { ...inOrder, milestones: [...inOrder.milestones].reverse() };
     expect(getShipmentStatus(shipment([shuffled]))).toBe(getShipmentStatus(shipment([inOrder])));
     expect(getShipmentStatus(shipment([shuffled]))).toBe("in_transit");
   });
 
-  it("uses the step that happened last, even if it was planned earlier", () => {
+  it("stays delivered when an earlier leg's missed step is reported late", () => {
+    // The sea leg's discharge arrives after the truck delivered, so its `at` is the newest.
+    const s = shipment([
+      leg(1, [["arrived", null], ["discharged", "2026-10-15T12:00:00Z"]]),
+      road("2026-10-12T08:00:00Z", "2026-10-12T09:00:00Z", "2026-10-12T12:00:00Z", 2),
+    ]);
+    expect(getShipmentStatus(s)).toBe("delivered");
+  });
+
+  it("counts a hold as resolved when customs cleared after it, whatever the planned order", () => {
     // Customs cleared after the hold, although the hold was listed (planned) later.
     const s = shipment([leg(1, [["customs_cleared", "2026-10-13T15:00:00Z"], ["customs_hold", "2026-10-13T10:00:00Z"]])]);
     expect(getShipmentStatus(s)).toBe("at_port");

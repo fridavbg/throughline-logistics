@@ -80,7 +80,9 @@ inventing information. It's the first candidate for a next step.
 - One time per operator message: `receivedAt` is used both as when a step happened
   (milestone `at`) and as when we last heard from the operator (stale detection). Real
   integrations would carry both: a message sent hours late, such as a batched email, would
-  then show the step at the right time without making the shipment look freshly updated.
+  then show the step at the right time without making the shipment look freshly updated. Until
+  then, status goes by the furthest step along the route rather than the newest `at`, so a
+  late report of a missed step can't move a delivered shipment back to the port.
 
 **Prioritised next steps**
 1. Real ingestion for the two highest-volume operators + normalization review queue.

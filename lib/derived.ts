@@ -28,41 +28,52 @@ export const LATE_AFTER_HOURS = 24;
 /** A step that has happened, with the position of its leg in the order of travel. */
 type DoneStep = { milestone: Milestone; at: number; legIndex: number };
 
-/**
- * Every step that has happened, oldest first by when it happened (`at`), so an operator
- * reporting late or out of order doesn't change the result. Steps at the same moment are
- * ordered by leg, then by planned time.
- */
+/** Every step that has happened, in the order the shipment's legs list them. */
 function doneSteps(s: Shipment): DoneStep[] {
-  const steps = s.legs.flatMap((leg, legIndex) =>
+  return s.legs.flatMap((leg, legIndex) =>
     leg.milestones.flatMap((milestone) =>
       milestone.at === null ? [] : [{ milestone, at: Date.parse(milestone.at), legIndex }],
     ),
   );
-  return steps.sort(
-    (a, b) =>
-      a.at - b.at ||
-      a.legIndex - b.legIndex ||
-      Date.parse(a.milestone.plannedAt) - Date.parse(b.milestone.plannedAt),
-  );
+}
+
+/** Orders steps along the route: by leg, then by planned time within the leg. */
+function byTravelOrder(a: DoneStep, b: DoneStep): number {
+  return a.legIndex - b.legIndex || Date.parse(a.milestone.plannedAt) - Date.parse(b.milestone.plannedAt);
 }
 
 /**
- * Where the shipment is now, from its latest step that has happened. An unresolved customs
- * hold (no `customs_cleared` after it) wins over any later step. A shipment with no step
- * done yet is `planned`.
+ * Whether customs is holding the shipment: its latest hold has no `customs_cleared` at the
+ * same time or after it. Decided by when steps happened, since a hold can come and go.
+ */
+function hasUnresolvedHold(steps: DoneStep[]): boolean {
+  const holds = steps.filter((step) => step.milestone.type === "customs_hold").map((step) => step.at);
+  if (holds.length === 0) return false;
+  const clearances = steps.filter((step) => step.milestone.type === "customs_cleared").map((step) => step.at);
+  const lastHold = Math.max(...holds);
+  return !clearances.some((at) => at >= lastHold);
+}
+
+/**
+ * Where the shipment is now. An unresolved customs hold wins over everything else.
+ * Otherwise it's the furthest step along the route that has happened, not the one reported
+ * last: `at` is when we received the report, so an operator sending a missed step late
+ * would otherwise move a delivered shipment back to the port. A shipment with no step done
+ * yet is `planned`.
  */
 export function getShipmentStatus(s: Shipment): ShipmentStatus {
   const steps = doneSteps(s);
-  const latest = steps.at(-1);
-  if (latest === undefined) return "planned";
+  if (hasUnresolvedHold(steps)) return "customs_hold";
 
-  const lastHold = steps.findLastIndex((step) => step.milestone.type === "customs_hold");
-  const lastClearance = steps.findLastIndex((step) => step.milestone.type === "customs_cleared");
-  if (lastHold > lastClearance) return "customs_hold";
+  // A resolved hold says nothing about where the shipment is, so it never counts as furthest.
+  const furthest = steps
+    .filter((step) => step.milestone.type !== "customs_hold")
+    .sort(byTravelOrder)
+    .at(-1);
+  if (furthest === undefined) return "planned";
 
-  const onLastLeg = latest.legIndex === s.legs.length - 1;
-  return statusAfter(latest.milestone.type, onLastLeg);
+  const onLastLeg = furthest.legIndex === s.legs.length - 1;
+  return statusAfter(furthest.milestone.type, onLastLeg);
 }
 
 /**
