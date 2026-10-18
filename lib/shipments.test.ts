@@ -75,7 +75,7 @@ describe("applyEvents", () => {
     expect(s.legs[2].milestones[0].at).toBeNull();
   });
 
-  it("moves on to the operator's next leg once their current leg is finished", () => {
+  it("moves on to the operator's next leg once their leg in progress is finished", () => {
     const s = applyEvents(roadSeaRoad(), [
       event("op-corvala", "picked_up", "2026-10-11T08:00:00.000Z"),
       event("op-corvala", "in_transit", "2026-10-11T09:00:00.000Z"),
@@ -86,7 +86,7 @@ describe("applyEvents", () => {
     expect(s.legs[2].milestones[0].at).toBe("2026-10-24T08:00:00.000Z");
   });
 
-  it("treats a repeat 'in transit' on the current leg as a repeat, not the next leg's step", () => {
+  it("treats a repeat 'in transit' on the leg in progress as a repeat, not the next leg's step", () => {
     const s = applyEvents(roadSeaRoad(), [
       event("op-corvala", "picked_up", "2026-10-11T08:00:00.000Z"),
       event("op-corvala", "in_transit", "2026-10-11T09:00:00.000Z"),

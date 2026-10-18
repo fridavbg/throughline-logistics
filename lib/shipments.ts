@@ -59,24 +59,27 @@ function applyToTimeline(legs: Leg[], event: RawEventRef): Leg[] {
     rawStatus: event.original,
   };
 
-  const current = currentLeg(theirs);
+  const inProgress = operatorLegInProgress(theirs);
   const isOpenStep = (m: Milestone) => m.type === type && m.at === null;
 
-  if (current.milestones.some(isOpenStep)) return completeStep(legs, current, isOpenStep, step);
-  if (current.milestones.some((m) => m.type === type)) return legs;
+  if (inProgress.milestones.some(isOpenStep)) return completeStep(legs, inProgress, isOpenStep, step);
+  if (inProgress.milestones.some((m) => m.type === type)) return legs;
 
-  const later = theirs.slice(theirs.indexOf(current) + 1).find((leg) => leg.milestones.some(isOpenStep));
+  const later = theirs.slice(theirs.indexOf(inProgress) + 1).find((leg) => leg.milestones.some(isOpenStep));
   if (later) return completeStep(legs, later, isOpenStep, step);
 
   const added: Milestone = { type, plannedAt: event.receivedAt, ...step };
-  const milestones = [...current.milestones, added].sort((a, b) =>
+  const milestones = [...inProgress.milestones, added].sort((a, b) =>
     a.plannedAt.localeCompare(b.plannedAt),
   );
-  return replaceLeg(legs, current, { ...current, milestones });
+  return replaceLeg(legs, inProgress, { ...inProgress, milestones });
 }
 
-/** The operator's leg in progress: their latest leg with a step done, or the next one once it's finished. */
-function currentLeg(theirs: Leg[]): Leg {
+/**
+ * The leg this operator is working on: their latest leg with a step done, or the next one once
+ * it's finished. Only looks at one operator's legs, so it isn't the shipment's current leg.
+ */
+function operatorLegInProgress(theirs: Leg[]): Leg {
   const started = theirs.map((leg) => leg.milestones.some((m) => m.at !== null)).lastIndexOf(true);
   const index = Math.max(started, 0);
   const finished = theirs[index].milestones.every((m) => m.at !== null);
