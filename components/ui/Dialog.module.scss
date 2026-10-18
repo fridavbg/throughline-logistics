@@ -1,0 +1,58 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-text) 40%, transparent);
+}
+
+// Centered on every screen size; on a phone it fills the width minus the gutter.
+.content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  gap: var(--space-4);
+  width: min(100% - 2 * var(--gutter), 32rem);
+  max-height: calc(100dvh - 2 * var(--gutter));
+  overflow-y: auto;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-modal);
+  transform: translate(-50%, -50%);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: var(--text-lg);
+}
+
+.description {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  // Pulls the larger hit area back so the icon lines up with the padding edge.
+  margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-surface-muted);
+  }
+}
