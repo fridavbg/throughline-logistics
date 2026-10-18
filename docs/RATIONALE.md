@@ -88,6 +88,9 @@ inventing information. It's the first candidate for a next step.
   mentions it): there is no history in synthetic data to learn from. It also gives no
   prediction during a customs hold, because the release time is unknown; the hold is an
   ops exception instead.
+- Dates are shown in Spain's time zone for everyone (`formatDay` in `lib/time.ts`), so the
+  server, the browser and tests agree on the day. A customer in the UK sees a Spanish date,
+  which differs only around midnight; production would use the viewer's time zone.
 - No authentication: personas simulate access control.
 - Real-time updates are simulated with a demo panel.
 - No map view; the leg timeline answers "where is it?".

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DEMO_NOW,
+  formatDay,
   daysAgo,
   daysFromNow,
   getNow,
@@ -49,5 +50,17 @@ describe("relative time helpers", () => {
     daysFromNow(10);
 
     expect(getNow().getTime()).toBe(DEMO_NOW.getTime());
+  });
+});
+
+describe("formatDay", () => {
+  it("shows the day as it falls in Spain, not on the machine running the code", () => {
+    expect(formatDay("2026-10-23T12:00:00Z")).toBe("Fri 23 Oct");
+    // 23:30 UTC is already the next day in Spain.
+    expect(formatDay("2026-10-22T23:30:00Z")).toBe("Fri 23 Oct");
+  });
+
+  it("says the date is unknown instead of throwing on a bad value", () => {
+    expect(formatDay("not-a-date")).toBe("date unknown");
   });
 });
