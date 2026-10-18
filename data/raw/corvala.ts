@@ -7,13 +7,13 @@ import { hoursAgo, minutesAgo } from "@/lib/time";
 
 /** Messages that build the seed scenarios (docs/DATA_MODEL.md §7). */
 export const corvalaFeed: CorvalaPayload[] = [
-  ...[100, 98, 94].map((h, i) => msg("SHP-1042", [10, 20, 30][i], h)),
-  ...[150, 148, 140].map((h, i) => msg("SHP-1043", [10, 20, 30][i], h)),
+  ...roadEvents("SHP-1042", [100, 98, 94]),
+  ...roadEvents("SHP-1043", [150, 148, 140]),
   msg("SHP-1044", 10, 5),
   msg("SHP-1044", 20, 4),
-  ...[60, 58, 54].map((h, i) => msg("SHP-1045", [10, 20, 30][i], h)),
-  ...[60, 58, 52].map((h, i) => msg("SHP-1046", [10, 20, 30][i], h)),
-  ...[50, 48, 44].map((h, i) => msg("SHP-1048", [10, 20, 30][i], h)),
+  ...roadEvents("SHP-1045", [60, 58, 54]),
+  ...roadEvents("SHP-1046", [60, 58, 52]),
+  ...roadEvents("SHP-1048", [50, 48, 44]),
   msg("SHP-1049", 10, 30),
   msg("SHP-1049", 20, 28),
   // Still on the road: a repeat update that came with the operator's later ETA.
@@ -22,6 +22,14 @@ export const corvalaFeed: CorvalaPayload[] = [
 
 function msg(ref: string, code: number, hours: number): CorvalaPayload {
   return { shipment_ref: ref, status_code: code, ts: hoursAgo(hours) };
+}
+
+/** A finished road leg: picked up (10), in transit (20) and delivered (30), each `hours` ago. */
+function roadEvents(
+  ref: string,
+  [pickedUp, inTransit, delivered]: [number, number, number],
+): CorvalaPayload[] {
+  return [msg(ref, 10, pickedUp), msg(ref, 20, inTransit), msg(ref, 30, delivered)];
 }
 
 /** Examples for the adapter tests, including a code we don't know. */

@@ -164,7 +164,8 @@ suggests commits, and may create GitHub issues and leave PR review comments (see
   - a footer referencing the same issue: `Refs #<n>`. Use `Closes #<n>`
     only in the PR description, so the issue closes when the PR merges, not on a
     partial commit
-  - a branch name if starting new work: `feat/<short-name>`, `fix/<short-name>`
+  - a branch name if starting new work: `<issue>-<type>-<short-name>`, the pattern GitHub
+    generates from an issue (Development → Create a branch), e.g. `32-chore-tighten-type-checks`
 
 Allowed with `gh`:
 - **Code review on PRs:** `gh pr view`, `gh pr diff`, `gh pr review --comment`.

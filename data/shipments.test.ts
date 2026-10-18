@@ -25,12 +25,16 @@ describe("seed data", () => {
 
   it("returns fresh copies, so changing a shipment can't change the seed", () => {
     const first = getShipments();
-    first[0].legs[0].milestones[0].at = "changed";
-    first[8].legs[0].milestones.push({ ...first[8].legs[0].milestones[0] });
+    const milestone = first[0]?.legs[0]?.milestones[0];
+    const lastLeg = first[8]?.legs[0];
+    if (!milestone || !lastLeg) throw new Error("The seed has fewer shipments than this test expects");
+    const original = milestone.at;
+    milestone.at = "changed";
+    lastLeg.milestones.push({ ...milestone });
 
     const again = getShipments();
-    expect(again[0].legs[0].milestones[0].at).not.toBe("changed");
-    expect(again[8].legs[0].milestones).toHaveLength(3);
+    expect(again[0]?.legs[0]?.milestones[0]?.at).toBe(original);
+    expect(again[8]?.legs[0]?.milestones).toHaveLength(3);
   });
 
   it("only has operator events for shipments that exist", () => {
@@ -59,7 +63,7 @@ describe("seed data", () => {
 
   it("has legs that connect: each leg starts where the previous one ended", () => {
     for (const s of shipments) {
-      s.legs.slice(1).forEach((l, i) => expect(l.from, `${s.id} leg ${l.sequence}`).toEqual(s.legs[i].to));
+      s.legs.slice(1).forEach((l, i) => expect(l.from, `${s.id} leg ${l.sequence}`).toEqual(s.legs[i]?.to));
     }
   });
 
@@ -88,7 +92,7 @@ describe("seed data", () => {
 describe("seed scenarios", () => {
   it("SHP-1042 left Valencia 26 hours late, an hour ago, with the operator's ETA unchanged", () => {
     const s = get("SHP-1042");
-    const departed = s.legs[1].milestones.find((m) => m.type === "departed")!;
+    const departed = done(s, "departed")!;
     expect((Date.parse(departed.at!) - Date.parse(departed.plannedAt)) / 3_600_000).toBe(26);
     expect(minutesSince(departed.at!)).toBe(60);
     expect(s.operatorEta.date).toBe(s.plannedEta);
@@ -113,7 +117,7 @@ describe("seed scenarios", () => {
 
   it("SHP-1043 is held by customs on the sea leg 40 minutes ago, packing list missing", () => {
     const s = get("SHP-1043");
-    const hold = s.legs[1].milestones.find((m) => m.type === "customs_hold");
+    const hold = s.legs[1]?.milestones.find((m) => m.type === "customs_hold");
     expect(hold?.at).toBeTruthy();
     expect(minutesSince(hold!.at!)).toBe(40); // past the 30-minute response target
     expect(s.documents.find((d) => d.type === "packing_list")?.status).toBe("missing");
@@ -131,7 +135,7 @@ describe("seed scenarios", () => {
 
   it("SHP-1046 left Barcelona about a day late, while the operator's ETA still says on time", () => {
     const s = get("SHP-1046");
-    const departed = s.legs[1].milestones.find((m) => m.type === "departed")!;
+    const departed = done(s, "departed")!;
     const lateHours = (Date.parse(departed.at!) - Date.parse(departed.plannedAt)) / 3_600_000;
     expect(lateHours).toBeGreaterThan(23);
     expect(s.operatorEta.date).toBe(s.plannedEta);
