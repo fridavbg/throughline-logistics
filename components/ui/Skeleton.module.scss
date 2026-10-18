@@ -1,0 +1,14 @@
+.skeleton {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+// Reduced motion is handled globally in globals.scss, which stops this animation.
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}

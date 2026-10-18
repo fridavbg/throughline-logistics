@@ -1,0 +1,12 @@
+.aiLabel {
+  display: inline-block;
+  padding: 0 var(--space-1);
+  border: 1px dashed var(--ai-accent);
+  border-radius: var(--radius-sm);
+  color: var(--ai-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

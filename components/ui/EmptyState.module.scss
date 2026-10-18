@@ -1,0 +1,22 @@
+.emptyState {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-7) var(--space-4);
+  text-align: center;
+}
+
+.icon {
+  display: inline-flex;
+  color: var(--color-text-muted);
+}
+
+.title {
+  font-size: var(--text-lg);
+}
+
+.message {
+  max-width: 40ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

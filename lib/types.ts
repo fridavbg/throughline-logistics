@@ -214,6 +214,12 @@ export type Shipment = {
 
 // ---------- Computed / AI (never stored on Shipment) ----------
 
+/**
+ * How sure the AI is, in words the UI shows next to every AI output.
+ * Worked out from a 0–1 confidence by `confidenceLevel()` in lib/ai/confidence.ts.
+ */
+export type ConfidenceLevel = "high" | "medium" | "needs_review";
+
 /** The AI's predicted arrival window. Always shown apart from the operator's ETA. */
 export type EtaPrediction = {
   earliest: string;
