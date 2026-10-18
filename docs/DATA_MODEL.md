@@ -19,7 +19,7 @@ components
 All time-based logic (stale detection, "updated 3h ago", ETA status) uses a fixed clock:
 
 ```ts
-// data/seed.ts
+// lib/time.ts (kept in lib/ so logic never depends on data/)
 export const DEMO_NOW = new Date("2026-10-21T10:00:00+02:00");
 ```
 
