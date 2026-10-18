@@ -1,24 +1,33 @@
+@use "@/styles/mixins" as *;
+
 .overlay {
   position: fixed;
   inset: 0;
   background: color-mix(in srgb, var(--color-text) 40%, transparent);
 }
 
-// Centered on every screen size; on a phone it fills the width minus the gutter.
+// Full screen on a phone (a drawer, CLAUDE.md UI principles); centered from md.
 .content {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  inset: 0;
   display: grid;
+  align-content: start;
   gap: var(--space-4);
-  width: min(100% - 2 * var(--gutter), 32rem);
-  max-height: calc(100dvh - 2 * var(--gutter));
   overflow-y: auto;
-  padding: var(--space-5);
-  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--gutter);
   background: var(--color-surface);
-  box-shadow: var(--shadow-modal);
-  transform: translate(-50%, -50%);
+
+  @include bp(md) {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: min(100% - 2 * var(--gutter), 36rem);
+    max-height: calc(100dvh - 2 * var(--gutter));
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    transform: translate(-50%, -50%);
+  }
 }
 
 .header {

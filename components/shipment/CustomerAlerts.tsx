@@ -31,7 +31,7 @@ export function CustomerAlerts({ alerts, now }: CustomerAlertsProps) {
                 {ICONS[alert.severity]}
               </span>
               <div className={styles.body}>
-                <p>{alert.message}</p>
+                <p className={styles.message}>{alert.message}</p>
                 <p className={styles.meta}>
                   <SourceTag source={alert.source} />
                   {alert.confidence !== undefined && <ConfidenceMeter confidence={alert.confidence} audience="customer" />}

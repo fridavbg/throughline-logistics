@@ -55,6 +55,10 @@ inventing information. It's the first candidate for a next step.
   reload or a pasted link keeps it and closing the tab resets the demo. The server can't read
   it, so the store is read back after the first render (`skipHydration`) and role pages show a
   skeleton until then, instead of a hydration mismatch or an early redirect to the picker.
+- What ops does in the inbox (handled items, approved messages) lives in the store's memory
+  only: switching persona keeps it, so an approved message shows up for the customer, and a
+  reload starts the demo over. Only an approved message or *Resolve* stops the customer's
+  escalation acknowledgement; a snooze or a call to the operator doesn't tell the customer anything.
 
 **Production (proposed)**
 - **Ingestion:** operator APIs and webhooks, EDI, inbound email, and optionally a carrier

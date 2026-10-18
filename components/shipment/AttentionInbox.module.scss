@@ -1,0 +1,61 @@
+@use "@/styles/mixins" as *;
+
+.inbox {
+  display: grid;
+  gap: var(--space-4);
+}
+
+// Count above the filters on a phone; side by side from md.
+.bar {
+  display: grid;
+  gap: var(--space-3);
+
+  @include bp(md) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.heading {
+  font-size: var(--text-md);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-2);
+
+  @include bp(md) {
+    display: flex;
+  }
+}
+
+.filter {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+
+  select {
+    min-height: var(--touch-target);
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}

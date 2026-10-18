@@ -4,6 +4,7 @@ import {
   formatAgo,
   formatDay,
   formatDayRange,
+  formatDuration,
   daysAgo,
   daysFromNow,
   getNow,
@@ -84,5 +85,13 @@ describe("formatAgo", () => {
   it("calls a future time 'just now' and a bad one unknown", () => {
     expect(formatAgo(hoursFromNow(1), DEMO_NOW)).toBe("just now");
     expect(formatAgo("nope", DEMO_NOW)).toBe("time unknown");
+  });
+});
+
+describe("formatDuration", () => {
+  it("shows minutes, then hours and minutes", () => {
+    expect(formatDuration(8)).toBe("8 min");
+    expect(formatDuration(80)).toBe("1h 20 min");
+    expect(formatDuration(120)).toBe("2h");
   });
 });
