@@ -5,6 +5,25 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // The demo runs on a fixed clock, so code must read time from getNow() (lib/time.ts).
+  // new Date(isoString) for parsing stays allowed.
+  {
+    files: ["lib/**/*.ts", "app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+    ignores: ["lib/time.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "NewExpression[callee.name='Date'][arguments.length=0]",
+          message: "Use getNow() from lib/time.ts: the demo runs on a fixed clock.",
+        },
+        {
+          selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+          message: "Use getNow() from lib/time.ts: the demo runs on a fixed clock.",
+        },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
