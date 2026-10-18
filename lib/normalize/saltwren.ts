@@ -41,10 +41,11 @@ function parseEdiTime(value: string, line: string): string {
  * all is rejected with an error naming the line, since it can't even be tied to a time.
  */
 export function normalizeSaltwren(line: string): NormalizedEvent {
-  if (!LINE_SHAPE.test(line)) {
+  const [ref, code, , time] = line.split("|");
+  // The shape check guarantees all four parts; the undefined checks tell TypeScript so.
+  if (!LINE_SHAPE.test(line) || ref === undefined || code === undefined || time === undefined) {
     throw new Error(`Not a Saltwren event line: "${line}"`);
   }
-  const [ref, code, , time] = line.split("|");
   const milestone = CODES[code] ?? null;
   return {
     shipmentId: ref,

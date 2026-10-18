@@ -58,7 +58,7 @@ const roadSeaRoad = () =>
 describe("applyEvents", () => {
   it("completes the planned step on the operator's leg and keeps the original as rawStatus", () => {
     const s = applyEvents(roadSeaRoad(), [event("op-saltwren", "departed", "2026-10-18T09:00:00.000Z")]);
-    const departed = s.legs[1].milestones.find((m) => m.type === "departed");
+    const departed = s.legs[1]?.milestones.find((m) => m.type === "departed");
 
     expect(departed).toMatchObject({
       at: "2026-10-18T09:00:00.000Z",
@@ -71,8 +71,8 @@ describe("applyEvents", () => {
   it("completes one leg only when the operator runs two legs", () => {
     const s = applyEvents(roadSeaRoad(), [event("op-corvala", "picked_up", "2026-10-11T08:00:00.000Z")]);
 
-    expect(s.legs[0].milestones[0].at).toBe("2026-10-11T08:00:00.000Z");
-    expect(s.legs[2].milestones[0].at).toBeNull();
+    expect(s.legs[0]?.milestones[0]?.at).toBe("2026-10-11T08:00:00.000Z");
+    expect(s.legs[2]?.milestones[0]?.at).toBeNull();
   });
 
   it("moves on to the operator's next leg once their leg in progress is finished", () => {
@@ -83,7 +83,7 @@ describe("applyEvents", () => {
       event("op-corvala", "picked_up", "2026-10-24T08:00:00.000Z"),
     ]);
 
-    expect(s.legs[2].milestones[0].at).toBe("2026-10-24T08:00:00.000Z");
+    expect(s.legs[2]?.milestones[0]?.at).toBe("2026-10-24T08:00:00.000Z");
   });
 
   it("treats a repeat 'in transit' on the leg in progress as a repeat, not the next leg's step", () => {
@@ -93,8 +93,8 @@ describe("applyEvents", () => {
       event("op-corvala", "in_transit", "2026-10-11T11:00:00.000Z"),
     ]);
 
-    expect(s.legs[0].milestones[1].at).toBe("2026-10-11T09:00:00.000Z");
-    expect(s.legs[2].milestones.every((m) => m.at === null)).toBe(true);
+    expect(s.legs[0]?.milestones[1]?.at).toBe("2026-10-11T09:00:00.000Z");
+    expect(s.legs[2]?.milestones.every((m) => m.at === null)).toBe(true);
   });
 
   it("keeps a low-confidence event for review without changing the timeline", () => {
@@ -115,10 +115,10 @@ describe("applyEvents", () => {
       event("op-saltwren", "discharged", "2026-10-12T04:00:00.000Z"),
       event("op-saltwren", "customs_hold", "2026-10-12T06:00:00.000Z", 0.82),
     ]);
-    const types = s.legs[1].milestones.map((m) => m.type);
+    const types = s.legs[1]?.milestones.map((m) => m.type);
 
-    expect(types.at(-1)).toBe("customs_hold");
-    expect(s.legs[1].milestones.at(-1)?.at).toBe("2026-10-12T06:00:00.000Z");
+    expect(types?.at(-1)).toBe("customs_hold");
+    expect(s.legs[1]?.milestones.at(-1)?.at).toBe("2026-10-12T06:00:00.000Z");
   });
 
   it("ignores a repeat of a step that already happened, but keeps the message", () => {
@@ -127,7 +127,7 @@ describe("applyEvents", () => {
       event("op-saltwren", "departed", "2026-10-18T21:00:00.000Z"),
     ]);
 
-    expect(s.legs[1].milestones.find((m) => m.type === "departed")?.at).toBe("2026-10-18T09:00:00.000Z");
+    expect(s.legs[1]?.milestones.find((m) => m.type === "departed")?.at).toBe("2026-10-18T09:00:00.000Z");
     expect(s.rawEvents).toHaveLength(2);
   });
 
@@ -144,7 +144,7 @@ describe("applyEvents", () => {
     ]);
 
     expect(s.rawEvents).toHaveLength(0);
-    expect(s.legs[1].milestones.every((m) => m.at === null)).toBe(true);
+    expect(s.legs[1]?.milestones.every((m) => m.at === null)).toBe(true);
   });
 
   it("applies events in time order, whatever order they arrive in", () => {
@@ -153,7 +153,7 @@ describe("applyEvents", () => {
       event("op-corvala", "picked_up", "2026-10-11T08:00:00.000Z"),
     ]);
 
-    expect(s.legs[0].milestones[0].at).toBe("2026-10-11T08:00:00.000Z");
+    expect(s.legs[0]?.milestones[0]?.at).toBe("2026-10-11T08:00:00.000Z");
     expect(s.rawEvents.map((e) => e.receivedAt)).toEqual(["2026-10-11T08:00:00.000Z", "2026-10-24T08:00:00.000Z"]);
   });
 

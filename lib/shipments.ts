@@ -51,7 +51,8 @@ function applyToTimeline(legs: Leg[], event: RawEventRef): Leg[] {
   if (type === null) return legs;
 
   const theirs = legs.filter((leg) => leg.operatorId === event.operatorId);
-  if (theirs.length === 0) return legs;
+  const inProgress = operatorLegInProgress(theirs);
+  if (inProgress === undefined) return legs;
 
   const step: Pick<Milestone, "at" | "source" | "rawStatus"> = {
     at: event.receivedAt,
@@ -59,7 +60,6 @@ function applyToTimeline(legs: Leg[], event: RawEventRef): Leg[] {
     rawStatus: event.original,
   };
 
-  const inProgress = operatorLegInProgress(theirs);
   const isOpenStep = (m: Milestone) => m.type === type && m.at === null;
 
   if (inProgress.milestones.some(isOpenStep)) return completeStep(legs, inProgress, isOpenStep, step);
@@ -78,12 +78,15 @@ function applyToTimeline(legs: Leg[], event: RawEventRef): Leg[] {
 /**
  * The leg this operator is working on: their latest leg with a step done, or the next one once
  * it's finished. Only looks at one operator's legs, so it isn't the shipment's current leg.
+ * `undefined` when the operator runs none of the legs.
  */
-function operatorLegInProgress(theirs: Leg[]): Leg {
+function operatorLegInProgress(theirs: Leg[]): Leg | undefined {
   const started = theirs.map((leg) => leg.milestones.some((m) => m.at !== null)).lastIndexOf(true);
   const index = Math.max(started, 0);
-  const finished = theirs[index].milestones.every((m) => m.at !== null);
-  return finished && index + 1 < theirs.length ? theirs[index + 1] : theirs[index];
+  const leg = theirs[index];
+  if (leg === undefined) return undefined;
+  const finished = leg.milestones.every((m) => m.at !== null);
+  return finished ? (theirs[index + 1] ?? leg) : leg;
 }
 
 function completeStep(
