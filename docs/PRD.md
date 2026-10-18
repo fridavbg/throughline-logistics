@@ -124,11 +124,11 @@ Logic lives in `lib/ai/` as deterministic functions over the mock data.
 | A2 | **ETA prediction** | ETA block, customer cards | Predicts an arrival range from leg progress, known delays and route history; gives the main reason | Customers hear about delays before the operator updates its ETA |
 | A3 | **Exception triage** | Ops inbox | Scores exceptions by severity × customer priority × time left to the response target, and ranks them | Ops works on what matters first, before targets are missed |
 | A4 | **Next best action + draft message** | Ops inbox, detail | Suggests the action; drafts the customer notification for an ops user to edit and approve | Removes repetitive writing; keeps a human in control |
-| A5 | **Shipment summary** | Customer cards, detail | One plain-language sentence: where it is, whether it's on time, what happens next | Answers the customer's real question at a glance |
+| A5 | **Shipment summary** | Customer cards, detail | A few plain-language points: where it is, whether it's on time, what happens next | Answers the customer's real question at a glance |
 
 **Rules**
 - AI never overwrites operator data; predictions are stored and shown separately.
-- Confidence below 0.6 → show "Needs review" instead of a firm answer.
+- Confidence below 0.6 → show "Needs review" (ops) or "Awaiting update" (customers) instead of a firm answer.
 - **Customer delivery tiers:**
   - *Automatic:* status, operator ETA, summary (A5) and ETA prediction (A2) shown in the portal.
   - *Automatic above threshold:* proactive delay alerts go out only with High confidence (≥ 0.8);

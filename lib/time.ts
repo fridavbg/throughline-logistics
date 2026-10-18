@@ -39,6 +39,26 @@ export function formatDay(iso: string): string {
   return Number.isNaN(ms) ? "date unknown" : dayFormat.format(ms);
 }
 
+/** A window of days: "Fri 23 Oct", or "Fri 23 Oct – Sat 24 Oct" when it spans days. */
+export function formatDayRange(earliest: string, latest: string): string {
+  const [from, to] = [formatDay(earliest), formatDay(latest)];
+  return from === to ? from : `${from} – ${to}`;
+}
+
+/**
+ * How long ago something happened, for freshness: "12 min ago", "3h ago", "2 days ago".
+ * A time in the future (clock skew) counts as "just now".
+ */
+export function formatAgo(iso: string, now: Date): string {
+  const minutes = Math.floor((now.getTime() - Date.parse(iso)) / MINUTE_MS);
+  if (Number.isNaN(minutes)) return "time unknown";
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)} days ago`;
+}
+
 // Helpers for seed data: times relative to the demo clock, such as "updated 31 hours ago".
 // They add plain milliseconds instead of using date-fns `addDays`, because `addDays` keeps
 // the local clock time, so its result would depend on the timezone of the machine running

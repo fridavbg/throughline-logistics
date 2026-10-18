@@ -83,6 +83,9 @@ Pill with icon + label. Two separate sets, never merged into one badge:
   `Delivered` (package-check, green). Problems such as incidents are exceptions, not a status.
 - **`EtaStatus`** (will it make it): `On time` (check-circle, green) · `At risk`
   (clock-alert, amber) · `Late` (alert-triangle, red).
+  Customers see the same tones and icons with plainer words: `On time` · `Up to a day late` ·
+  `More than a day late`, matching the AI summary. "At risk" stays an ops (triage) term,
+  since a customer can read it as a risk to the goods.
 
 ### SourceTag
 Shows where a value comes from. Sits next to every ETA and milestone time.
@@ -113,7 +116,10 @@ apart from operator data. Longer AI blocks (suggestions, drafts) add a dashed le
 - **AiSuggestion:** suggested action + reason + action button. "Why?" expands the reasoning.
 - **ConfidenceMeter:** three levels, text always shown: **High** (≥ 0.8), **Medium**
   (0.6–0.8), **Needs review** (< 0.6, amber, shows "Review" instead of a firm answer).
-- **AiSummary:** one sentence, regular weight, preceded by the `AI` label.
+  Customers see **Awaiting update** instead of Needs review: they can't review anything, and
+  for them a low score only comes from a quiet operator.
+- **AiSummary:** the `AI` label, then a short bulleted list (where it is, arrival, what's next),
+  regular weight, with a dashed left border. Points, not one long sentence, so it scans on a phone.
 - **DraftMessage:** dialog with an editable draft, recipient, linked shipment;
   buttons *Discard* and *Approve & send*. Footer: "Drafted by AI. Review before sending."
 
@@ -156,11 +162,11 @@ apart from operator data. Longer AI blocks (suggestions, drafts) add a dashed le
 
 **Customer: My shipments**
 ```
-On time 6 · At risk 1 · Late 1 · Delivered 4
+On time 6 · Up to a day late 1 · More than a day late 1 · Delivered 4
 [Alerts]  ⚠ SHP-1042 likely to arrive 2 days late (AI prediction)
 ┌──────────────────────┐ ┌──────────────────────┐
 │ Hamburg              │ │ Hamburg              │
-│ Thu 23 Oct [At risk] │ │ Mon 27 Oct [On time] │
+│ Thu 23 Oct [Up to a day late] │ │ Mon 27 Oct [On time] │
 │ [AI] At sea, expect… │ │ [AI] Picked up in…   │
 └──────────────────────┘ └──────────────────────┘
 ```

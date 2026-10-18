@@ -15,7 +15,7 @@ const allShipments = getShipments();
 
 /**
  * A plain list of the shipments the current persona may see, so the perimeter can be
- * checked. Placeholder until the attention inbox (F2) and "My shipments" (F4) replace it.
+ * checked. Placeholder on the ops home until the attention inbox (F2) replaces it.
  */
 export function VisibleShipments() {
   const user = useCurrentUser();
