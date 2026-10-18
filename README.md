@@ -10,12 +10,16 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
 > Frontend-only prototype. All data, operators and AI output are synthetic.
 
 ## Demo walkthrough (≈ 3 min)
-1. Sign in as **Rick (Ops, all sites)** → the attention inbox ranks a customs hold first.
-2. Open it → the timeline shows each leg, the customs step and the original operator messages.
-3. **Notify customer** → review the AI draft → approve.
-4. Open **Demo** (bottom right) → *Vessel delayed at Valencia* → a new exception appears.
-5. Switch to **Morty (Ops, Terrassa)** → only Terrassa shipments are visible.
-6. Switch to **Summer (Customer, Ostrel Deutschland)** → the delay alert and AI-predicted ETA.
+1. Sign in as **Rick (Ops, all sites)** → the attention inbox ranks the customs hold on
+   SHP-1043 first; *Why this rank?* explains it.
+2. Click **SHP-1043** → no arrival date while customs holds it, the timeline with each leg and
+   the customs step, and the original operator messages next to how they were read.
+3. **Request document** → review the AI draft → *Approve & send*.
+4. **Back to Attention**, then switch to **Morty (Ops, Terrassa)** → only Terrassa shipments; a
+   shorter inbox.
+5. Switch to **Summer (Customer, Ostrel Deutschland)** → the delay alert for SHP-1042, and the
+   AI-predicted arrival under the operator's ETA.
+6. **View details** on SHP-1042 → the plain-language summary, timeline and documents.
 
 ## AI features
 The AI is simulated on purpose: deterministic rules in `lib/ai/`, no model calls. The same
