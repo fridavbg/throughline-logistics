@@ -1,4 +1,4 @@
-import { CircleCheck, ClockAlert, TriangleAlert } from "lucide-react";
+import { CircleCheck, CircleHelp, ClockAlert, TriangleAlert } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import type { EtaStatus, User } from "@/lib/types";
@@ -33,6 +33,8 @@ function etaStatusLook(status: EtaStatus): { tone: BadgeTone; icon: ReactNode } 
       return { tone: "risk", icon: <ClockAlert {...ICON} /> };
     case "late":
       return { tone: "incident", icon: <TriangleAlert {...ICON} /> };
+    case "unknown":
+      return { tone: "neutral", icon: <CircleHelp {...ICON} /> };
     default: {
       // Adding an ETA status without giving it a look here fails to compile.
       const unhandled: never = status;
@@ -43,9 +45,9 @@ function etaStatusLook(status: EtaStatus): { tone: BadgeTone; icon: ReactNode } 
 
 /** A Record over both unions fails to compile if a status or audience is added without words. */
 const LABELS: Record<User["role"], Record<EtaStatus, string>> = {
-  ops: { on_time: "On time", at_risk: "At risk", late: "Late" },
+  ops: { on_time: "On time", at_risk: "At risk", late: "Late", unknown: "ETA unknown" },
   // Matches the AI summary's wording (lib/ai/summarize.ts), so the card says one thing.
-  customer: { on_time: "On time", at_risk: "Up to a day late", late: "More than a day late" },
+  customer: { on_time: "On time", at_risk: "Up to a day late", late: "More than a day late", unknown: "ETA unknown" },
 };
 
 /** The words for an ETA status, e.g. `etaStatusLabel("at_risk", "customer")` → "Up to a day late". */

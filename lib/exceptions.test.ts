@@ -75,6 +75,12 @@ describe("detectExceptions: delays", () => {
     const late = { ...s, operatorEta: { ...s.operatorEta, date: new Date(Date.parse(s.plannedEta) + 72 * 3_600_000).toISOString() } };
     expect(detectExceptions(late, NOW)[0]?.impact).toBe("ETA +3 days");
   });
+
+  it("raises no delay when the operator's ETA can't be read: that's no firm answer", () => {
+    const s = seed("SHP-1049");
+    const unreadable = { ...s, operatorEta: { ...s.operatorEta, date: "not a date" } };
+    expect(found(unreadable)).toEqual([]);
+  });
 });
 
 describe("detectExceptions: other types", () => {

@@ -8,7 +8,7 @@ import { HIGH_CONFIDENCE, REVIEW_BELOW } from "@/lib/ai/confidence";
 import { predictEta } from "@/lib/ai/eta";
 import { messagesCustomer } from "@/lib/ai/draft";
 import { summarizeShipment } from "@/lib/ai/summarize";
-import { getEtaStatus, getFurthestStep, getLastUpdateAt, getShipmentStatus, isOverdue } from "@/lib/derived";
+import { getEtaStatus, getFurthestStep, getLastUpdateAt, getShipmentStatus, isDelayed, isOverdue } from "@/lib/derived";
 import { formatDayRange, HOUR_MS } from "@/lib/time";
 import type {
   CustomerAlert,
@@ -41,7 +41,7 @@ export type CustomerShipment = {
 export type EtaCounts = Record<EtaStatus, number> & { delivered: number };
 
 /**
- * The customer's shipments, late first, then at risk, then on time, then delivered (newest
+ * The customer's shipments, late first, then at risk, ETA unknown, on time, then delivered (newest
  * first). Within a group, the earliest arrival first. Deliveries older than 30 days drop out.
  * Expects shipments already filtered to the customer by `visibleShipments`.
  */
@@ -68,7 +68,8 @@ function toCustomerShipment(shipment: Shipment, now: Date): CustomerShipment {
   };
 }
 
-const RANK: Record<EtaStatus, number> = { late: 0, at_risk: 1, on_time: 2 };
+// Unknown needs more attention than on time, but it isn't a known delay.
+const RANK: Record<EtaStatus, number> = { late: 0, at_risk: 1, unknown: 2, on_time: 3 };
 
 function byUrgency(a: CustomerShipment, b: CustomerShipment): number {
   const byRank = rank(a) - rank(b);
@@ -85,7 +86,7 @@ function arrivalTime(view: CustomerShipment): number {
 
 /** Delivered shipments come after every active one. */
 function rank(view: CustomerShipment): number {
-  return view.delivery === undefined ? RANK[view.eta.status] : 3;
+  return view.delivery === undefined ? RANK[view.eta.status] : 4;
 }
 
 /** The arrival the customer is shown: the end of a firm AI window, else the operator's ETA. */
@@ -95,7 +96,7 @@ function bestEta(view: CustomerShipment): string {
 
 /** Counts for the summary bar, from the view so they always match the cards. */
 export function countByEta(views: CustomerShipment[]): EtaCounts {
-  const counts: EtaCounts = { on_time: 0, at_risk: 0, late: 0, delivered: 0 };
+  const counts: EtaCounts = { on_time: 0, at_risk: 0, late: 0, unknown: 0, delivered: 0 };
   for (const view of views) {
     if (view.delivery === undefined) counts[view.eta.status] += 1;
     else counts.delivered += 1;
@@ -113,7 +114,7 @@ export function customerAlerts(views: CustomerShipment[]): CustomerAlert[] {
     .flatMap((view) => {
       const { prediction, shipment, eta } = view;
       if (!prediction || prediction.confidence < HIGH_CONFIDENCE) return [];
-      if (eta.source !== "ai_predicted" || eta.status === "on_time") return [];
+      if (eta.source !== "ai_predicted" || !isDelayed(eta.status)) return [];
       // Dated when the step that revealed the delay was reported, not when the page was opened.
       const createdAt = getFurthestStep(shipment)?.milestone.at ?? getLastUpdateAt(shipment);
       if (createdAt === null || createdAt === undefined) return [];

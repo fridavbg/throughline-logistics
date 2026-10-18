@@ -186,9 +186,15 @@ describe("seed scenarios", () => {
   });
 
   it("has SHP-1049 as the only shipment at risk by its operator ETA", () => {
-    const notOnTime = shipments.filter((s) => getEtaStatus(s).status !== "on_time").map((s) => s.id);
-    expect(notOnTime).toEqual(["SHP-1049"]);
+    const delayed = shipments
+      .filter((s) => ["at_risk", "late"].includes(getEtaStatus(s).status))
+      .map((s) => s.id);
+    expect(delayed).toEqual(["SHP-1049"]);
     expect(getEtaStatus(get("SHP-1049"))).toEqual({ status: "at_risk", source: "estimated" });
+  });
+
+  it("SHP-1043: no on-time answer while customs holds it (demo step 2)", () => {
+    expect(getEtaStatus(get("SHP-1043")).status).toBe("unknown");
   });
 
   it("predicts an ETA only for the delayed and the stale shipments", () => {

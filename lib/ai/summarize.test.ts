@@ -114,6 +114,11 @@ describe("summarizeShipment: one wording per ETA status", () => {
     expect(arrivalPoint(shipment(atSea))).toBe(`Expected ${ETA_DAY} (operator estimate), on time`);
   });
 
+  it("no on-time or late words when the operator's ETA can't be read", () => {
+    const s = shipment(atSea, { operatorEta: { date: "not a date", source: "estimated" } });
+    expect(arrivalPoint(s)).not.toMatch(/on time|late/);
+  });
+
   it("up to a day late when the operator's ETA is within 24h of the promise", () => {
     const s = shipment(atSea, { operatorEta: { date: t(100), source: "estimated" } });
     expect(arrivalPoint(s)).toBe(`Expected ${formatDay(t(100))} (operator estimate), up to a day late`);

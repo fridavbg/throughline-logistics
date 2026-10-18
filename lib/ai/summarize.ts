@@ -83,7 +83,8 @@ function where(s: Shipment, status: "in_transit" | "at_port"): string {
 
 /** When it arrives, worded by who says so, and when `firm`, whether that's on time. */
 function arrival(s: Shipment, trusted: EtaPrediction | undefined, firm = true): string {
-  const lateness = firm ? `, ${latenessWords(getEtaStatus(s, trusted).status)}` : "";
+  const words = firm ? latenessWords(getEtaStatus(s, trusted).status) : undefined;
+  const lateness = words ? `, ${words}` : "";
   if (trusted) return `AI predicts arrival ${formatDayRange(trusted.earliest, trusted.latest)}${lateness}`;
   const day = formatDay(s.operatorEta.date);
   return s.operatorEta.source === "confirmed"
@@ -91,8 +92,11 @@ function arrival(s: Shipment, trusted: EtaPrediction | undefined, firm = true): 
     : `Expected ${day} (operator estimate)${lateness}`;
 }
 
-function latenessWords(status: EtaStatus): string {
+/** How on time it is, in words, or `undefined` when the data gives no firm answer. */
+function latenessWords(status: EtaStatus): string | undefined {
   switch (status) {
+    case "unknown":
+      return undefined;
     case "on_time":
       return "on time";
     case "at_risk":
