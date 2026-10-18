@@ -159,6 +159,12 @@ export type EtaPrediction = {
   source: "ai_predicted";
 };
 
+export type ShipmentSummary = {    // A5, shown to customers with the AI label
+  text: string;                 // one sentence: where, on time?, what's next
+  confidence: number;           // 0–1
+  reason: string;               // "Operator estimate; last update 2h ago"
+};
+
 export type ExceptionType =
   | "delay" | "customs_hold" | "stale" | "missing_document" | "incident" | "needs_review";
 export type NextAction =
@@ -189,7 +195,7 @@ export type CustomerAlert = {
 };
 ```
 
-## 5. Derived values (pure functions in `lib/derived.ts`, `lib/access.ts` and `lib/ai/eta.ts`)
+## 5. Derived values (pure functions in `lib/derived.ts`, `lib/access.ts`, `lib/ai/eta.ts` and `lib/ai/summarize.ts`)
 | Function | Returns | Rule |
 |---|---|---|
 | `getShipmentStatus(s)` | `ShipmentStatus` | Derived, never stored: an unresolved `customs_hold` (no `customs_cleared` at or after it, by `at`) wins. Otherwise from the furthest completed milestone along the route (leg, then `plannedAt`), not the newest `at`: `at` is the receipt time, so a late report of a missed step would move the shipment backwards. `delivered` on an earlier leg means `at_port`; only on the last leg is the shipment `delivered`. No milestone done: `planned` |
@@ -198,6 +204,7 @@ export type CustomerAlert = {
 | `isStale(s, now)` | `boolean` | Status is `in_transit` or `at_port` and `now - getLastUpdateAt(s) > 24h` |
 | `getEtaStatus(s, prediction?)` | `EtaStatusWithSource` | Best available ETA = `prediction.latest` if confidence ≥ 0.6, else `operatorEta` (also when there is no prediction). Minus `plannedEta`: ≤ 0h `on_time`, ≤ 24h `at_risk`, > 24h `late`. `source` is `ai_predicted` when the prediction was used, else the operator ETA's source, so the UI can label who says it's late |
 | `predictEta(s, now)` | `EtaPrediction \| undefined` | Simulated AI (A2). None when `planned`, `delivered` or `customs_hold`, or when nothing is known: furthest step < 1h late and not stale. Known delay: `latest` = `plannedEta` + delay, `earliest` = `plannedEta` + 75% of it; none if `operatorEta` is already at or after `latest`. Confidence 0.85, −0.1 while customs is ahead, −0.3 when stale, never below 0.6 (a delay that has happened always counts). Stale with no known delay: `plannedEta` to `plannedEta` + hours since the last update, confidence 0.5 (Needs review). Never changes the shipment |
+| `summarizeShipment(s, now)` | `ShipmentSummary` | Simulated AI (A5). One sentence: where it is (current leg, port of the latest step, customs hold place, or delivery), the arrival worded by its source ("arriving" only when confirmed, "(operator estimate)", "AI predicts" only at confidence ≥ 0.6) with on time / up to a day late / more than a day late from `getEtaStatus`, and the next step not yet done. Customs hold: no date, the release time is unknown. Stale without a known delay: no on-time claim. Confidence = the `predictEta` confidence if any (so 0.5 when stale), else 0.95. Dates as `EEE d MMM` in Spain's time zone (`formatDay`) |
 | `isOverdue(e, now)` | `boolean` | `now > respondBy` |
 | `getCurrentLeg(s)` | `Leg \| undefined` | The latest leg with a completed milestone, or the next leg once all its milestones are done, so a skipped operator report doesn't hold it back. First leg before departure, last leg once delivered; `undefined` only without legs |
 | `canView(user, s)` | `boolean` | Customer: `customerId` match. Ops: `siteIds === "all"` or `originSiteId` in `siteIds` |
