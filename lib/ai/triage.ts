@@ -5,6 +5,7 @@
  */
 import { isOverdue } from "@/lib/derived";
 import { detectExceptions } from "@/lib/exceptions";
+import { formatDuration } from "@/lib/time";
 import type { Customer, DetectedException, ExceptionType, Severity, Shipment, ShipmentException } from "@/lib/types";
 
 export const SEVERITY_WEIGHT: Record<Severity, number> = { critical: 1, warning: 0.6 };
@@ -60,17 +61,9 @@ function reason(e: DetectedException, priority: Customer["priority"], overdue: b
   // Overdue rounds up and time left rounds down, so neither shows "0 min" while time is still on the clock.
   const msToDeadline = Date.parse(e.respondBy) - now.getTime();
   const time = overdue
-    ? `Overdue by ${duration(Math.ceil(-msToDeadline / 60_000))}`
-    : `${duration(Math.floor(msToDeadline / 60_000))} left to respond`;
+    ? `Overdue by ${formatDuration(Math.ceil(-msToDeadline / 60_000))}`
+    : `${formatDuration(Math.floor(msToDeadline / 60_000))} left to respond`;
   const severity = `${e.severity === "critical" ? "Critical" : "Warning"}: ${EXCEPTION_LABELS[e.type].toLowerCase()}`;
   const customer = priority === "key" ? "Key customer" : "Standard customer";
   return [time, severity, customer].join(" · ");
-}
-
-/** "8 min", "1h 20 min", "2h". */
-function duration(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m === 0 ? `${h}h` : `${h}h ${m} min`;
 }
