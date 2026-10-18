@@ -169,6 +169,12 @@ export type RawEventRef = {
   confidence: number;
 };
 
+/** An operator event after its adapter has read it, tagged with the shipment it belongs to. */
+export type NormalizedEvent = {
+  shipmentId: string;
+  event: RawEventRef;
+};
+
 /**
  * A shipment from one origin site to one customer, made of legs in order of travel,
  * e.g. road → sea → road. Status, staleness, lateness and the time of the last operator
