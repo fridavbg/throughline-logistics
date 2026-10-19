@@ -28,7 +28,8 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
 7. **View details** on SHP-1042 → the plain-language summary, timeline and documents.
 
 The demo panel has two more events: a vague email for SHP-1048 (ops must review it) and a
-delivery for SHP-1044. *Reset demo* goes back to the starting state.
+delivery for SHP-1044. *Reset demo* goes back to the starting state. A reload keeps your
+progress; closing the tab also starts over.
 
 **Not built yet** (planned for v1.2.0, see the
 [Breadth milestone](https://github.com/fridavbg/throughline-logistics/milestone/4)): filters
