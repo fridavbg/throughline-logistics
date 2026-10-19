@@ -89,6 +89,11 @@ inventing information. It's the first candidate for a next step.
 - Operators provide updates via API, EDI or email.
 - One customer and one origin site per shipment.
 - "Stale" = no update for 24h while in transit or at port.
+- Email reading values are starting values too (`lib/ai/normalizeText.ts`): 0.9 for a plainly
+  stated step (as for Quickfern's free text), halved when hedged, 0.2 when nothing is read. A
+  hedge or negation anywhere in the email counts, which sends some certain steps to review: the
+  safe direction, since a wrong step would change the timeline. Phrase rules stand in for a
+  language model; a real one would also need these thresholds measured on real emails.
 - Triage weights are starting values too (`lib/ai/triage.ts`): critical 1, warning 0.6; key
   customer 1, standard 0.8. Overdue items get their own band (90–100), so they rank on top
   whatever their weight.
