@@ -29,6 +29,7 @@
       "Bash(gh issue list:*)",
       "Bash(gh issue view:*)",
       "Bash(gh issue comment:*)",
+      "Bash(gh api -X PATCH repos/fridavbg/throughline-logistics/issues/*)",
       "Bash(npm run lint)",
       "Bash(npm run build)",
       "Bash(npm run test)",
