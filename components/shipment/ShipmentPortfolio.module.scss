@@ -104,7 +104,9 @@
   font-weight: var(--weight-medium);
 }
 
+// On its own line under the ref: a table cell lays out inline otherwise.
 .sub {
+  display: block;
   color: var(--color-text-muted);
 }
 
