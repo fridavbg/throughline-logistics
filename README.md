@@ -73,6 +73,11 @@ npm run dev
 | `npm run typecheck` | TypeScript check |
 | `npm run test` | Unit tests (Vitest) |
 
+Install scripts for `@parcel/watcher` and `unrs-resolver` are denied on purpose (`allowScripts`
+in `package.json`): npm installs their prebuilt binary for your platform, so the scripts aren't
+needed. If lint fails with a missing native binding (for example after
+`npm install --omit=optional`), run `npm install-scripts approve unrs-resolver` and reinstall.
+
 ## Project structure
 ```
 app/         routes: role picker, ops, customer, shipment detail
