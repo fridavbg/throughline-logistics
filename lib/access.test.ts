@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { users } from "@/data/seed";
-import { getShipments } from "@/data/shipments";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { canView, findVisibleShipment, visibleShipments } from "@/lib/access";
 import type { Shipment, User } from "@/lib/types";
 
-const shipments = getShipments();
+const shipments = getMidDemoShipments();
 
 function persona(id: string): User {
   const user = users.find((u) => u.id === id);

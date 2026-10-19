@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { DemoPanel } from "@/components/layout/DemoPanel";
 import { formatDayTime, getNow } from "@/lib/time";
 import styles from "./AppShell.module.scss";
 
@@ -14,7 +15,8 @@ export type AppShellProps = {
 /**
  * The frame around every page: a skip link, a header with logo, title and the demo time, and
  * the main content. The demo time is always visible, so relative times like "Updated 2h ago"
- * make sense to anyone viewing the demo on a later day.
+ * make sense to anyone viewing the demo on a later day. The demo panel floats over every page
+ * once a persona is chosen.
  */
 export function AppShell({ title, actions, children }: AppShellProps) {
   const now = getNow().toISOString();
@@ -38,6 +40,7 @@ export function AppShell({ title, actions, children }: AppShellProps) {
       <main id="main" className={styles.main}>
         {children}
       </main>
+      <DemoPanel />
     </>
   );
 }

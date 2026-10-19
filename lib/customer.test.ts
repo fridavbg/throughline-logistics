@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getShipments } from "@/data/shipments";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { customers, users } from "@/data/seed";
 import { rankExceptions } from "@/lib/ai/triage";
 import { visibleShipments } from "@/lib/access";
@@ -9,7 +9,7 @@ import { daysAgo, getNow } from "@/lib/time";
 import type { Shipment } from "@/lib/types";
 
 const NOW = getNow();
-const all = getShipments();
+const all = getMidDemoShipments();
 const summer = users.find((u) => u.id === "user-summer");
 if (!summer) throw new Error("Seed persona user-summer is missing");
 const ostrel = customerShipments(visibleShipments(summer, all), NOW);

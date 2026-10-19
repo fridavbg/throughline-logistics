@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { places as p } from "@/data/locations";
 import { documents, roadLeg, seaLeg } from "@/data/plan";
-import { getShipments } from "@/data/shipments";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { exceptionOutcome, messageReading, messagesNewestFirst, timelineGroups, type TimelineGroup } from "@/lib/detail";
 import { sentAlertId } from "@/lib/inbox";
 import { hoursAgo, hoursFromNow } from "@/lib/time";
 import type { CustomerAlert, MilestoneType, RawEventRef, Shipment } from "@/lib/types";
 
-const seed = getShipments();
+const seed = getMidDemoShipments();
 
 function shipment(id: string): Shipment {
   const found = seed.find((s) => s.id === id);

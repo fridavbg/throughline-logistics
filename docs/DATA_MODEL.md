@@ -286,12 +286,16 @@ with `applyEvents` (`lib/shipments.ts`):
 - events below 0.6 confidence are kept for review but don't change the timeline;
 - unplanned steps (a customs hold) are added to the leg the operator is working on.
 
+**Demo events (F6):** `data/demoEvents.ts` holds the demo panel's events as raw operator
+messages, read by the same adapters. `getShipments(events)` applies them on top of the seed
+feeds; the store keeps only which events were triggered, so everything derived recomputes.
+
 Customs milestones sit on the sea leg, after `discharged`, at the arrival port. Seed emails carry
 a precomputed reading; the email normalizer is #19.
 
 **Exception timing:** an exception's `detectedAt` is the arrival time of the operator event
-that revealed it (a stale shipment: last update + 24h). Seed events are timed so the inbox at
-`DEMO_NOW` has one overdue item (SHP-1043 customs hold), one due within 10 min (SHP-1045
+that revealed it (a stale shipment: last update + 24h). Seed and demo events are timed so the inbox
+at `DEMO_NOW` has one overdue item (SHP-1043 customs hold), one due within 10 min (SHP-1045
 stale) and the rest with at least 30 min left.
 
 **Raw events:** every operator update on a seed shipment is a `rawEvents` entry, because the
@@ -304,13 +308,13 @@ values must give the inbox a realistic mix at `DEMO_NOW`: one overdue, one due i
 
 | Ref | Customer | Route | Legs | Scenario |
 |---|---|---|---|---|
-| SHP-1042 | Ostrel DE | Terrassa → Hamburg | road → sea → road | Vessel left Valencia 26h late, 1h ago; operator ETA unchanged. AI predicts late with High confidence (0.85), so the customer is alerted. In the seed because F6 (demo panel) is cut, so demo step 6 has its delay |
+| SHP-1042 | Ostrel DE | Terrassa → Hamburg | road → sea → road | Seed: at Valencia, on time (a repeated gate-in 6h ago keeps it from going stale). Demo event "Vessel delayed at Valencia": loaded and left 26h late, 1h ago; operator ETA unchanged. AI predicts late with High confidence (0.85), so the customer is alerted |
 | SHP-1043 | Thornquist | Zaragoza → Manchester | road → sea → road | Customs hold at Southampton, packing list missing (the one overdue item: tops the inbox) |
-| SHP-1044 | Calvera | Terrassa → Valencia | road | Domestic, on time |
+| SHP-1044 | Calvera | Terrassa → Valencia | road | Domestic, on time. Demo event "Delivery confirmed": delivered |
 | SHP-1045 | Ostrel DE | Porto → Hamburg | road → sea → road | Stale: no update for ~26h (due for review in under 10 min). AI prediction 0.5: Needs review |
 | SHP-1046 | Thornquist | Terrassa → Birmingham | road → sea → road | Vessel left Barcelona ~24h late; AI predicts at risk before the operator ETA changes. Medium confidence (0.75, customs ahead), so it becomes an ops exception, not a customer alert |
 | SHP-1047 | Calvera | Zaragoza → Murcia | road | Delivered |
-| SHP-1048 | Pellow | Terrassa → Rotterdam | road → sea → road | Low-confidence email update (0.45) → `needs_review`. Arrives via the demo event if F6 is built, otherwise included in seed |
+| SHP-1048 | Pellow | Terrassa → Rotterdam | road → sea → road | Demo event "Email update received": low-confidence email (0.45) → `needs_review` |
 | SHP-1049 | Ostrel DE | Zaragoza → Hamburg | road | Long-haul road, at risk |
 | SHP-1050 | Thornquist | Porto → Leeds | road → sea → road | Planned, not departed |
 | SHP-1051 | Calvera | Porto → Madrid | road | Brennick Freight CSV feed, in transit |

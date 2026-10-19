@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getShipments } from "@/data/shipments";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { customers } from "@/data/seed";
 import { draftNotification, messagesCustomer } from "@/lib/ai/draft";
 import { detectExceptions } from "@/lib/exceptions";
@@ -9,7 +9,7 @@ import type { Customer, Shipment } from "@/lib/types";
 const NOW = getNow();
 
 function seed(id: string): { s: Shipment; customer: Customer } {
-  const s = getShipments().find((x) => x.id === id);
+  const s = getMidDemoShipments().find((x) => x.id === id);
   const customer = customers.find((c) => c.id === s?.customerId);
   if (!s || !customer) throw new Error(`Seed shipment ${id} or its customer is missing`);
   return { s, customer };

@@ -6,16 +6,12 @@ import { EtaCounts } from "@/components/shipment/EtaCounts";
 import { ShipmentCard } from "@/components/shipment/ShipmentCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { customers } from "@/data/seed";
-import { getShipments } from "@/data/shipments";
 import { visibleShipments } from "@/lib/access";
 import { rankExceptions } from "@/lib/ai/triage";
 import { countByEta, customerAlerts, customerShipments, escalationAlerts } from "@/lib/customer";
-import { useCurrentUser, useDemoStore } from "@/lib/store";
+import { useCurrentUser, useDemoStore, useShipments } from "@/lib/store";
 import { getNow } from "@/lib/time";
 import styles from "./MyShipments.module.scss";
-
-/** Built once: the seed data never changes until demo events arrive (F6). */
-const allShipments = getShipments();
 
 /**
  * The customer home (F4): summary bar, alerts, then one card per shipment, most urgent
@@ -24,6 +20,7 @@ const allShipments = getShipments();
  */
 export function MyShipments() {
   const user = useCurrentUser();
+  const allShipments = useShipments();
   const settledIds = useDemoStore((state) => state.settledIds);
   const sentAlerts = useDemoStore((state) => state.sentAlerts);
   if (!user) return null;

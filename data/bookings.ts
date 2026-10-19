@@ -12,7 +12,8 @@ type Booking = Omit<Shipment, "rawEvents">;
 
 const bookings: Booking[] = [
   {
-    // The vessel left Valencia 26 hours late, an hour ago; the operator's ETA hasn't moved yet.
+    // Waiting at Valencia. The demo event "Vessel delayed at Valencia" makes it leave 26 hours
+    // late, an hour ago, while the operator's ETA doesn't move (data/demoEvents.ts).
     id: "SHP-1042",
     customerId: "cust-ostrel-de",
     originSiteId: "site-terrassa",

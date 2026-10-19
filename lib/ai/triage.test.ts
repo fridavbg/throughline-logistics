@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getShipments } from "@/data/shipments";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { customers } from "@/data/seed";
 import { rankExceptions, scoreException } from "@/lib/ai/triage";
 import { getNow, minutesAgo, minutesFromNow } from "@/lib/time";
 import type { DetectedException } from "@/lib/types";
 
 const NOW = getNow();
-const ranked = rankExceptions(getShipments(), customers, NOW);
+const ranked = rankExceptions(getMidDemoShipments(), customers, NOW);
 
 /** A detected exception with a given severity, detected and due at the given times. */
 function detected(severity: DetectedException["severity"], detectedAt: string, respondBy: string): DetectedException {
@@ -81,7 +81,7 @@ describe("scoreException", () => {
   });
 
   it("orders ties by the earliest deadline, so the order never depends on input order", () => {
-    const reversed = rankExceptions([...getShipments()].reverse(), customers, NOW);
+    const reversed = rankExceptions([...getMidDemoShipments()].reverse(), customers, NOW);
     expect(reversed.map((e) => e.id)).toEqual(ranked.map((e) => e.id));
   });
 });
