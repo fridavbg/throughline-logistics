@@ -1,15 +1,18 @@
 // Each seed shipment must still show the scenario it exists for (docs/DATA_MODEL.md §7).
 // The rules themselves are tested in lib/derived.test.ts and lib/ai/eta.test.ts; here they
-// run on the seed.
+// run on the seed, mid-demo: SHP-1042's delay and SHP-1048's email come from the demo panel
+// (data/demoEvents.test.ts covers the state before and after each event).
 import { describe, expect, it } from "vitest";
 import { getBookings } from "@/data/bookings";
+import { eventsFor } from "@/data/demoEvents";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { getOperatorEvents, getShipments } from "@/data/shipments";
 import { predictEta } from "@/lib/ai/eta";
 import { getEtaStatus, getShipmentStatus, isStale } from "@/lib/derived";
 import { DEMO_NOW } from "@/lib/time";
 import type { MilestoneType, Shipment } from "@/lib/types";
 
-const shipments = getShipments();
+const shipments = getMidDemoShipments();
 const byId = new Map(shipments.map((s) => [s.id, s]));
 const get = (id: string): Shipment => {
   const s = byId.get(id);
@@ -47,7 +50,8 @@ describe("seed data", () => {
   });
 
   it("puts every operator update on a shipment as a raw event", () => {
-    expect(shipments.reduce((n, s) => n + s.rawEvents.length, 0)).toBe(getOperatorEvents().length);
+    const demo = eventsFor(["vessel-delayed", "email-update"]);
+    expect(shipments.reduce((n, s) => n + s.rawEvents.length, 0)).toBe(getOperatorEvents().length + demo.length);
   });
 
   it("keeps the operator's original message on every completed step", () => {

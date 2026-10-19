@@ -14,17 +14,13 @@ import { Timeline } from "@/components/shipment/Timeline";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { customers } from "@/data/seed";
-import { getShipments } from "@/data/shipments";
 import { findVisibleShipment } from "@/lib/access";
 import { toCustomerShipment } from "@/lib/customer";
 import { getCurrentLeg } from "@/lib/derived";
 import { homePath } from "@/lib/personas";
-import { useCurrentUser } from "@/lib/store";
+import { useCurrentUser, useShipments } from "@/lib/store";
 import { formatDay, getNow } from "@/lib/time";
 import styles from "./ShipmentDetail.module.scss";
-
-/** Built once: the seed data never changes until demo events arrive (F6). */
-const allShipments = getShipments();
 
 /** Invented address on a reserved domain (.example), so the link can never reach a real inbox. */
 const SUPPORT_EMAIL = "support@throughline.example";
@@ -41,6 +37,7 @@ export type ShipmentDetailProps = {
  */
 export function ShipmentDetail({ id }: ShipmentDetailProps) {
   const user = useCurrentUser();
+  const allShipments = useShipments();
   if (!user) return null;
 
   const home = homePath(user.role);

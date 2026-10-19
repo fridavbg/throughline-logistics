@@ -12,13 +12,4 @@ export const operatorEmails: OperatorEmail[] = [
     body: "Hi, the container is held by UK customs at Southampton pending the packing list. Will advise.",
     reading: { milestone: "customs_hold", confidence: 0.82 },
   },
-  {
-    // Too vague to act on (0.45): it doesn't change the timeline and goes to ops for review.
-    ref: "SHP-1048",
-    operatorId: "op-saltwren",
-    receivedAt: minutesAgo(15),
-    subject: "SHP-1048 schedule",
-    body: "Hi, the vessel might call at Rotterdam a day early, depending on berth availability. Will confirm.",
-    reading: { milestone: "arrived", confidence: 0.45 },
-  },
 ];

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { getShipments } from "@/data/shipments";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { detectExceptions, RESPONSE_MINUTES, severityOf } from "@/lib/exceptions";
 import { getNow, hoursAgo, minutesAgo } from "@/lib/time";
 import type { RawEventRef, Shipment } from "@/lib/types";
 
 const NOW = getNow();
-const all = getShipments();
+const all = getMidDemoShipments();
 
 function seed(id: string): Shipment {
   const s = all.find((x) => x.id === id);

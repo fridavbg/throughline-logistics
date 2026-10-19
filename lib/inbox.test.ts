@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getShipments } from "@/data/shipments";
+import { getMidDemoShipments } from "@/data/fixtures";
 import { customers, sites, users } from "@/data/seed";
 import { visibleShipments } from "@/lib/access";
 import { approvedAlert, filterInbox, inboxItems, NO_FILTER, responseLabel, routeLabel } from "@/lib/inbox";
 import { getNow } from "@/lib/time";
 
 const NOW = getNow();
-const all = getShipments();
+const all = getMidDemoShipments();
 const items = inboxItems(all, customers, sites, [], NOW);
 const ids = (list: typeof items) => list.map((i) => i.exception.id);
 

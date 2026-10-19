@@ -25,8 +25,12 @@ export function getOperatorEvents(): NormalizedEvent[] {
   ];
 }
 
-/** Every shipment, normalized and up to date with all its operator events. */
-export function getShipments(): Shipment[] {
-  const events = getOperatorEvents();
+/**
+ * Every shipment, normalized and up to date with all its operator events. `demoEvents` are
+ * extra operator events from the demo panel (F6), applied on top of the seed feeds; leaving
+ * them out gives the seed state, which is how "Reset demo" works.
+ */
+export function getShipments(demoEvents: NormalizedEvent[] = []): Shipment[] {
+  const events = [...getOperatorEvents(), ...demoEvents];
   return getBookings().map((booking) => applyEvents(booking, events));
 }

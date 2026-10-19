@@ -1,0 +1,94 @@
+// Floats above the page, bottom right. The dashed border marks it as a demo tool, not product UI.
+.trigger {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border: 1px dashed var(--color-text-muted);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-surface-muted);
+  }
+}
+
+.content {
+  display: grid;
+  gap: var(--space-3);
+  width: min(100vw - 2 * var(--gutter), 22rem);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-text-muted);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.heading {
+  font-weight: var(--weight-semibold);
+}
+
+.intro,
+.effect,
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.event {
+  display: grid;
+  gap: var(--space-1);
+}
+
+// Full width and left-aligned, so long labels wrap instead of overflowing on a phone.
+.eventButton {
+  justify-content: flex-start;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
+
+// Sits just above the Demo button. Empty (and hidden) until there is something to report, but
+// always in the page, so screen readers pick up each new notice.
+.notice {
+  position: fixed;
+  right: var(--gutter);
+  bottom: calc(var(--gutter) + var(--touch-target) + var(--space-2));
+  z-index: 10;
+  display: grid;
+  gap: var(--space-2);
+  width: min(100vw - 2 * var(--gutter), 22rem);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-text-muted);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--text-sm);
+
+  &:empty {
+    display: none;
+  }
+}
+
+.noticeActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

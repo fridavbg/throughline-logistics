@@ -5,17 +5,13 @@ import { useState } from "react";
 import { ExceptionRow } from "@/components/shipment/ExceptionRow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { customers, sites } from "@/data/seed";
-import { getShipments } from "@/data/shipments";
 import { visibleShipments } from "@/lib/access";
 import { EXCEPTION_LABELS } from "@/lib/ai/triage";
 import { filterInbox, inboxItems, NO_FILTER, type InboxFilter } from "@/lib/inbox";
-import { useCurrentUser, useDemoStore } from "@/lib/store";
+import { useCurrentUser, useDemoStore, useShipments } from "@/lib/store";
 import { getNow } from "@/lib/time";
 import type { ExceptionType } from "@/lib/types";
 import styles from "./AttentionInbox.module.scss";
-
-/** Built once: the seed data never changes until demo events arrive (F6). */
-const allShipments = getShipments();
 
 const TYPES = Object.keys(EXCEPTION_LABELS) as ExceptionType[]; // keys of a Record<ExceptionType, …>: exactly the union
 
@@ -25,6 +21,7 @@ const TYPES = Object.keys(EXCEPTION_LABELS) as ExceptionType[]; // keys of a Rec
  */
 export function AttentionInbox() {
   const user = useCurrentUser();
+  const allShipments = useShipments();
   const handledIds = useDemoStore((state) => state.handledIds);
   const [filter, setFilter] = useState<InboxFilter>(NO_FILTER);
   if (!user) return null;
