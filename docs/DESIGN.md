@@ -135,8 +135,8 @@ apart from operator data. Longer AI blocks (suggestions, drafts) add a dashed le
   the final layout.
 - **DemoPanel:** floating bottom-right button "Demo" opening a popover with scripted events
   and "Reset demo". Visually separate (dashed border) so it's clearly not product UI.
-  Shows the demo clock ("Demo time: Wed 21 Oct, 10:00") so relative times like
-  "updated 2h ago" make sense to anyone viewing later.
+  After an event the panel closes and a notice says what changed, with a link to the
+  shipment, or that it's outside the persona's perimeter. The demo clock lives in the header.
 - **RoleSwitcher:** header dropdown showing the current persona (name, role, perimeter).
 
 ## 7. Screens

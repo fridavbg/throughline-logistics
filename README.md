@@ -17,11 +17,15 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
 2. Click **SHP-1043** → no arrival date while customs holds it, the timeline with each leg and
    the customs step, and the original operator messages next to how they were read.
 3. **Request document** → review the AI draft → *Approve & send*.
-4. **Back to Attention**, then switch to **Morty (Ops, Terrassa)** → only Terrassa shipments; a
-   shorter inbox.
-5. Switch to **Summer (Customer, Ostrel Deutschland)** → the delay alert for SHP-1042, and the
+4. **Back to Attention**, open the **Demo** button (bottom right) → *Vessel delayed at
+   Valencia* → a delay for SHP-1042 joins the inbox, ranked by urgency, without a reload.
+5. Switch to **Morty (Ops, Terrassa)** → only Terrassa shipments; a shorter inbox.
+6. Switch to **Summer (Customer, Ostrel Deutschland)** → the delay alert for SHP-1042, and the
    AI-predicted arrival under the operator's ETA.
-6. **View details** on SHP-1042 → the plain-language summary, timeline and documents.
+7. **View details** on SHP-1042 → the plain-language summary, timeline and documents.
+
+The demo panel has two more events: a vague email for SHP-1048 (ops must review it) and a
+delivery for SHP-1044. *Reset demo* goes back to the starting state.
 
 ## AI features
 The AI is simulated on purpose: deterministic rules in `lib/ai/`, no model calls. The same

@@ -64,6 +64,13 @@ inventing information. It's the first candidate for a next step.
   unknown id gets a real 404. Whether the persona may see it is checked in the browser, and a
   shipment outside their perimeter shows the same "couldn't find" message as an unknown one,
   so a customer can't learn which ids exist. In production this check moves to the server.
+- Demo panel events (F6) are raw operator messages in each operator's own format, read by the
+  same adapters as the seed, so a simulated event takes the path a real one would. The store
+  keeps only the ids of triggered events; `useShipments()` rebuilds the shipments from the seed
+  plus those events, and status, ETA, exceptions and alerts recompute from them. Nothing derived
+  is stored, so nothing can go out of date, and *Reset demo* is just an empty list. Reset also
+  clears what ops did in the inbox, because those actions may refer to exceptions an event
+  created.
 
 **Production (proposed)**
 - **Ingestion:** operator APIs and webhooks, EDI, inbound email, and optionally a carrier
@@ -116,6 +123,10 @@ inventing information. It's the first candidate for a next step.
   late report of a missed step can't move a delivered shipment back to the port. The ETA
   prediction inherits this: a step reported hours after it happened reads as that many
   hours late.
+- A planned step with no report doesn't count as late on its own: lateness comes from steps the
+  operator reported. Before the demo's "Vessel delayed" event, SHP-1042 reads as on time while
+  its loading, planned 30h earlier, is still unreported. A production version would flag an
+  overdue step as at risk.
 - A second customs hold on the same leg (held, cleared, held again) is ignored when events
   are applied, because a step that already happened isn't repeated. Status stays `at_port`
   instead of `customs_hold`. No demo shipment is held twice (#35).

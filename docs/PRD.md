@@ -152,7 +152,8 @@ Logic lives in `lib/ai/` as deterministic functions over the mock data.
 2. Open it → timeline shows the sea leg and customs step; raw operator message next to the
    normalized status.
 3. *Notify customer* → review the AI draft → approve.
-4. Demo panel → "Vessel delayed at Valencia" → a new exception appears at the top.
+4. Demo panel → "Vessel delayed at Valencia" → a new delay exception joins the inbox, ranked
+   by triage (below the overdue customs hold).
 5. Switch to **Ops (Terrassa)** → only Terrassa shipments are visible; the inbox is shorter.
 6. Switch to **Customer (Ostrel Deutschland)** → alert for that delay; card shows "Late"
    with the AI-predicted range next to the operator ETA.
