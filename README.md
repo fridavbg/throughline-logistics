@@ -7,6 +7,8 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
 
 **Live demo:** https://throughline-logistics.vercel.app
 
+**Project board:** https://github.com/users/fridavbg/projects/5
+
 > Frontend-only prototype. All data, operators and AI output are synthetic.
 > The app runs at a fixed demo time, **Wed 21 Oct 2026, 10:00** (Spain), shown in the header,
 > so every visit shows the same state. Times like "Updated 2h ago" count from it.
@@ -26,6 +28,11 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
 
 The demo panel has two more events: a vague email for SHP-1048 (ops must review it) and a
 delivery for SHP-1044. *Reset demo* goes back to the starting state.
+
+**Not built yet** (planned for v1.2.0, see the
+[Breadth milestone](https://github.com/fridavbg/throughline-logistics/milestone/4)): the ops
+portfolio table (F3), a fourth operator with more seed shipments, a repeated customs hold on
+the same leg, and showing ops who received an approved message.
 
 ## AI features
 The AI is simulated on purpose: deterministic rules in `lib/ai/`, no model calls. The same
