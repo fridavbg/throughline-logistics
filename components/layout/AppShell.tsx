@@ -9,6 +9,8 @@ export type AppShellProps = {
   title: string;
   /** Controls on the right of the header, such as the role switcher. */
   actions?: ReactNode;
+  /** Navigation between a role's pages, shown under the header (ops only). */
+  nav?: ReactNode;
   children: ReactNode;
 };
 
@@ -18,7 +20,7 @@ export type AppShellProps = {
  * make sense to anyone viewing the demo on a later day. The demo panel floats over every page
  * once a persona is chosen.
  */
-export function AppShell({ title, actions, children }: AppShellProps) {
+export function AppShell({ title, actions, nav, children }: AppShellProps) {
   const now = getNow().toISOString();
   return (
     <>
@@ -37,6 +39,7 @@ export function AppShell({ title, actions, children }: AppShellProps) {
           {actions && <div className={styles.actions}>{actions}</div>}
         </div>
       </header>
+      {nav}
       <main id="main" className={styles.main}>
         {children}
       </main>

@@ -30,7 +30,7 @@ app/
   page.tsx                  # Role picker (demo login)
   ops/                      # Internal operations view
     page.tsx                # Exceptions inbox (default)
-    shipments/page.tsx      # Portfolio table (filters: site, operator, mode, status); planned, #20
+    shipments/page.tsx      # Portfolio table; filters and search planned, #20
   customer/
     page.tsx                # My shipments + alerts
   shipments/[id]/page.tsx   # Shared detail; content adapts to role

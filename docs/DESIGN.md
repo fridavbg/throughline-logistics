@@ -144,7 +144,8 @@ apart from operator data. Longer AI blocks (suggestions, drafts) add a dashed le
 **App shell**
 - Header: Throughline logo · page title · demo time ("Demo time: Wed 21 Oct, 10:00") ·
   RoleSwitcher. The demo time is always visible, not only in the demo panel.
-- Ops: left nav (Attention, Shipments) from `lg`; tabs under the header below `lg`.
+- Ops: tabs (Attention, Shipments) under the header at every width; two pages don't need a
+  left nav.
 - Customer: no nav needed; single page plus detail.
 
 **Ops: Attention inbox**
@@ -160,7 +161,8 @@ apart from operator data. Longer AI blocks (suggestions, drafts) add a dashed le
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Ops: Shipments** — filter bar + dense table; stale rows show an amber FreshnessLabel.
+**Ops: Shipments** — dense table, most urgent first; stale rows show an amber FreshnessLabel.
+Rows stack into cards with their column names below `md`. Filter bar planned (#20).
 
 **Customer: My shipments**
 ```

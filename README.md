@@ -18,7 +18,8 @@ with AI that predicts delays, ranks what needs attention and drafts the follow-u
    SHP-1043 first; *Why this rank?* explains it.
 2. Click **SHP-1043** → no arrival date while customs holds it, the timeline with each leg and
    the customs step, and the original operator messages next to how they were read.
-3. **Request document** → review the AI draft → *Approve & send*.
+3. **Request document** → review the AI draft → *Approve & send*. The item leaves the inbox;
+   the **Shipments** tab lists every shipment, and SHP-1043's detail now shows *Customer notified*.
 4. **Back to Attention**, open the **Demo** button (bottom right) → *Vessel delayed at
    Valencia* → a delay for SHP-1042 joins the inbox, ranked by urgency, without a reload.
 5. Switch to **Morty (Ops, Terrassa)** → only Terrassa shipments; a shorter inbox.
@@ -30,9 +31,9 @@ The demo panel has two more events: a vague email for SHP-1048 (ops must review 
 delivery for SHP-1044. *Reset demo* goes back to the starting state.
 
 **Not built yet** (planned for v1.2.0, see the
-[Breadth milestone](https://github.com/fridavbg/throughline-logistics/milestone/4)): the ops
-portfolio table (F3), a fourth operator with more seed shipments, a repeated customs hold on
-the same leg, and showing ops who received an approved message.
+[Breadth milestone](https://github.com/fridavbg/throughline-logistics/milestone/4)): filters
+and search on the ops Shipments table (F3), a fourth operator with more seed shipments, a
+repeated customs hold on the same leg, and showing ops who received an approved message.
 
 ## AI features
 The AI is simulated on purpose: deterministic rules in `lib/ai/`, no model calls. The same

@@ -75,7 +75,11 @@ export function toCustomerShipment(shipment: Shipment, now: Date): CustomerShipm
 // Unknown needs more attention than on time, but it isn't a known delay.
 const RANK: Record<EtaStatus, number> = { late: 0, at_risk: 1, unknown: 2, on_time: 3 };
 
-function byUrgency(a: CustomerShipment, b: CustomerShipment): number {
+/**
+ * Late first, then at risk, ETA unknown, on time, then delivered (newest first); within a
+ * group, the earliest arrival first. Also orders the ops portfolio, so both views agree.
+ */
+export function byUrgency(a: CustomerShipment, b: CustomerShipment): number {
   const byRank = rank(a) - rank(b);
   if (byRank !== 0) return byRank;
   if (a.delivery && b.delivery) return Date.parse(b.delivery.at) - Date.parse(a.delivery.at);
