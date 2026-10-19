@@ -16,7 +16,8 @@ export type TextReading = {
 // Checked from the furthest step back, so an email naming several steps ("loaded and
 // departed") is read as the furthest one. Cleared comes before hold, so "released by customs
 // after the hold" and "customs hold lifted" read as cleared. Up to three words may sit
-// between "held by" and "customs" ("held by UK Border Force customs").
+// between "held by" and "customs" ("held by UK Border Force customs"). A port call in the
+// present tense needs a vessel ("the vessel might call at"), so "please call at 10:00" isn't one.
 const PHRASES: [RegExp, MilestoneType][] = [
   [
     /cleared (?:by )?customs|released by (?:\w+ ){0,3}customs|customs clearance (?:granted|completed)|hold (?:lifted|released)/,
@@ -26,7 +27,7 @@ const PHRASES: [RegExp, MilestoneType][] = [
   [/declaration (?:submitted|lodged)|submitted to (?:\w+ ){0,3}customs/, "customs_submitted"],
   [/\bdelivered\b/, "delivered"],
   [/\bdischarged\b|unloaded from the vessel/, "discharged"],
-  [/\barrived\b|\bberthed\b|\bcall(?:ed)? at\b/, "arrived"],
+  [/\barrived\b|\bberthed\b|\bcalled at\b|\b(?:vessel|ship) (?:\w+ ){0,2}call at\b/, "arrived"],
   [/\bdeparted\b|\bsailed\b|\bleft (?:the )?port\b/, "departed"],
   [/\bloaded\b/, "loaded"],
   [/\bgate[- ]in\b|\bat the terminal\b/, "gate_in"],

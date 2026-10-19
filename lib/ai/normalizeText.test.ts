@@ -19,7 +19,7 @@ describe("readEmail: the demo's emails", () => {
   it("reads SHP-1048's demo email as arrived, but hedged, so 0.45 and under review", () => {
     const event = demoEvents.find((e) => e.id === "email-update")?.events[0]?.event;
     expect(event).toMatchObject({ normalizedTo: "arrived", confidence: 0.45 });
-    expect(event?.readingNote).toBe('Says "call at", but hedged: "might", "depending".');
+    expect(event?.readingNote).toBe('Says "vessel might call at", but hedged: "might", "depending".');
   });
 });
 
@@ -54,6 +54,12 @@ describe("readEmail: steps", () => {
 
   it("quotes the words as the operator wrote them", () => {
     expect(read("Container DISCHARGED at Hamburg.").note).toBe('Says "DISCHARGED".');
+  });
+
+  it("reads a port call only from a vessel, not from 'please call at' (PR review finding)", () => {
+    expect(read("The vessel called at Rotterdam this morning.").milestone).toBe("arrived");
+    expect(read("Please call at 10:00 to discuss the invoice.").milestone).toBeNull();
+    expect(read("Our driver will call at your warehouse tomorrow.").milestone).toBeNull();
   });
 
   it("doesn't read a step inside another word", () => {
