@@ -172,6 +172,9 @@ Allowed with `gh`:
   Never `--approve` or `--request-changes`; those decisions belong to the maintainer.
 - **Issues:** `gh issue create`, `gh issue list`, `gh issue view`, `gh issue comment`.
   Use a clear title, context, acceptance criteria, and a label (`bug`, `feature`, `chore`).
+  When an issue's work is done, tick its finished task boxes with
+  `gh api -X PATCH repos/fridavbg/throughline-logistics/issues/<n> -F body=@<file>`.
+  Change only the checkboxes in the body: never the title, labels or state.
 
 ## Commands
 - `npm run dev`: local dev

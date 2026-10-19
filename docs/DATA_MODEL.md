@@ -148,6 +148,7 @@ export type RawEventRef = {
   original: string;             // exactly as received
   normalizedTo: MilestoneType | null;
   confidence: number;           // 0–1, 1 for structured feeds
+  readingNote?: string;         // emails: the words the AI reading rests on
 };
 
 // ---------- Computed / AI (never stored on Shipment) ----------
@@ -272,7 +273,14 @@ SHP-1051;Recogido en origen;19/10/2026 11:20
 Subject: RE: SHP-1043 container status
 Hi, the container is held by UK customs at Southampton pending the packing list. Will advise.
 ```
-→ `customs_hold`, confidence 0.82, flags `packing_list` as missing.
+→ `customs_hold`, confidence 0.9, note `Says "held by UK customs".` The missing packing list
+comes from the shipment's documents, not from the email.
+
+Read by `readEmail` (`lib/ai/normalizeText.ts`, simulated AI): past-tense step phrases, the
+furthest step wins (cleared before held). A plain statement gives 0.9; a hedge anywhere in the
+email ("might", "depending", "expected to"…) halves it to 0.45, below the 0.6 needed to change
+the timeline; a negation ("not", "failed"…) or no phrase gives `null` at 0.2. The note quotes
+the operator's words, so ops can check the reading.
 
 ## 7. Seed scenarios
 Every shipment exists to demonstrate something. Build SHP-1042 → SHP-1050 first (P0, covers
@@ -290,8 +298,8 @@ with `applyEvents` (`lib/shipments.ts`):
 messages, read by the same adapters. `getShipments(events)` applies them on top of the seed
 feeds; the store keeps only which events were triggered, so everything derived recomputes.
 
-Customs milestones sit on the sea leg, after `discharged`, at the arrival port. Seed emails carry
-a precomputed reading; the email normalizer is #19.
+Customs milestones sit on the sea leg, after `discharged`, at the arrival port. Emails are read
+from their text by `readEmail` (see §6, Email).
 
 **Exception timing:** an exception's `detectedAt` is the arrival time of the operator event
 that revealed it (a stale shipment: last update + 24h). Seed and demo events are timed so the inbox

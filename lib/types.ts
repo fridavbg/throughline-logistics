@@ -177,6 +177,11 @@ export type RawEventRef = {
   normalizedTo: MilestoneType | null;
   /** How sure the reading is, from 0 to 1. Structured feeds are always 1. */
   confidence: number;
+  /**
+   * Why the AI read free text this way, e.g. `Says "held by UK customs".` Set for emails;
+   * a status code needs no explanation.
+   */
+  readingNote?: string;
 };
 
 /** An operator event after its adapter has read it, tagged with the shipment it belongs to. */

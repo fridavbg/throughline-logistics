@@ -34,7 +34,7 @@ data and demo clock always give the same output. The point is how AI fits the pr
 
 | | Feature | What it does | Where you see it |
 |---|---|---|---|
-| A1 | Status normalization | Reads each operator's own codes and messages as one shared set of milestones, with a confidence | Timeline, original operator messages |
+| A1 | Status normalization | Reads each operator's own codes and messages, emails included, as one shared set of milestones, with a confidence and the words it rests on ("Says 'held by UK customs'") | Timeline, original operator messages |
 | A2 | ETA prediction | Carries a known delay through to the arrival: a window, a confidence and the reason ("Vessel departed 26h late from Port of Valencia") | Customer cards, ETA block |
 | A3 | Exception triage | Finds what needs attention and ranks it by severity × customer priority × time left, saying why | Ops inbox |
 | A4 | Next action + draft | Suggests the next step and drafts the customer message; a person approves it | Ops inbox |

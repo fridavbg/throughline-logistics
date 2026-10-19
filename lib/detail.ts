@@ -88,11 +88,13 @@ export type MessageReading = {
 export function messageReading(event: RawEventRef): MessageReading {
   const readAs = event.normalizedTo === null ? null : STEP_LABELS[event.normalizedTo];
   const applied = readAs !== null && event.confidence >= MIN_CONFIDENCE_TO_APPLY;
-  let reason: string;
-  if (readAs === null) reason = "No shipment step recognised. Kept for review; the timeline is unchanged.";
-  else if (!applied) reason = "Too uncertain to act on. Kept for review; the timeline is unchanged.";
-  else if (event.confidence === 1) reason = "A known status code. Applied to the timeline.";
-  else reason = "Matched from the message text. Applied to the timeline.";
+  let outcome: string;
+  if (readAs === null) outcome = "No shipment step recognised. Kept for review; the timeline is unchanged.";
+  else if (!applied) outcome = "Too uncertain to act on. Kept for review; the timeline is unchanged.";
+  else if (event.confidence === 1) outcome = "A known status code. Applied to the timeline.";
+  else outcome = `${event.readingNote ?? "Matched from the message text."} Applied to the timeline.`;
+  // An uncertain or unread email still says which words the reading rests on.
+  const reason = !applied && event.readingNote ? `${event.readingNote} ${outcome}` : outcome;
   return { readAs, applied, reason };
 }
 

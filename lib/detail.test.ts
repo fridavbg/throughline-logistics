@@ -145,6 +145,15 @@ describe("messageReading", () => {
     expect(reading.reason).toContain("Matched from the message text");
   });
 
+  it("gives an email reading's own words as the reason, applied or not", () => {
+    const held = event({ channel: "email", normalizedTo: "customs_hold", confidence: 0.9, readingNote: 'Says "held by UK customs".' });
+    expect(messageReading(held).reason).toBe('Says "held by UK customs". Applied to the timeline.');
+    const vague = { ...held, normalizedTo: "arrived" as const, confidence: 0.45, readingNote: 'Says "call at", but hedged: "might".' };
+    expect(messageReading(vague).reason).toBe(
+      'Says "call at", but hedged: "might". Too uncertain to act on. Kept for review; the timeline is unchanged.',
+    );
+  });
+
   it("keeps an uncertain reading for review without applying it, exactly as applyEvents does", () => {
     expect(messageReading(event({ confidence: 0.59 })).applied).toBe(false);
     expect(messageReading(event({ confidence: 0.6 })).applied).toBe(true);
