@@ -26,7 +26,7 @@ it's AI and shows the confidence.
 
 | Feature | Problem it addresses | In the prototype | In production |
 |---|---|---|---|
-| **Status normalization** | Every operator uses different formats and vocabularies; some updates arrive by email | Rule/keyword mapping per operator; email parsed with a fixed confidence | Structured feeds (API/EDI) mapped deterministically. Unstructured input (email, PDF) parsed by an LLM with structured output, validated against the schema; low confidence goes to a review queue |
+| **Status normalization** | Every operator uses different formats and vocabularies; some updates arrive by email | Rule/keyword mapping per operator; email read by phrase rules, with lower confidence when the wording is hedged | Structured feeds (API/EDI) mapped deterministically. Unstructured input (email, PDF) parsed by an LLM with structured output, validated against the schema; low confidence goes to a review queue |
 | **ETA prediction** | Operator ETAs update late or not at all | Rule-based delay propagation across legs | Model trained on historical leg durations per lane/operator, plus live signals (vessel position, port congestion). Outputs a range and confidence |
 | **Exception triage** | Ops can't see what matters most | Weighted score: severity × customer priority × time left to the response target | Same rules first, tuned with ops feedback on what they actually acted on |
 | **Next action + draft** | Repetitive manual follow-ups | Template-based drafts per exception type | LLM drafts grounded in shipment data, with templates and tone guidelines; human approval required |
@@ -93,7 +93,7 @@ inventing information. It's the first candidate for a next step.
 - Operators provide updates via API, EDI or email.
 - One customer and one origin site per shipment.
 - "Stale" = no update for 24h while in transit or at port.
-- Email reading values are starting values too (`lib/ai/normalizeText.ts`): 0.9 for a plainly
+- Email reading values are starting values (`lib/ai/normalizeText.ts`): 0.9 for a plainly
   stated step (as for Quickfern's free text), halved when hedged, 0.2 when nothing is read. A
   hedge or negation anywhere in the email counts, which sends some certain steps to review: the
   safe direction, since a wrong step would change the timeline. Phrase rules stand in for a

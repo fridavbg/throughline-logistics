@@ -97,6 +97,15 @@ styles/      design tokens and global styles
 docs/        product, data model, design and rationale
 ```
 
+## How this was built
+Built with Claude Code as an AI pair programmer, as the brief encourages. I set the scope and
+priorities, defined the domain rules, tested the app as a user, and reviewed and made every
+commit. The logic was discussed before it was built: Claude Code proposed approaches with their
+trade-offs, and I chose between them and questioned the results, for example what the demo
+keeps across a reload and which part of the ops table to build first. Claude Code wrote most of
+the code under the rules in [`CLAUDE.md`](CLAUDE.md): one issue per pull request, no commits of
+its own, and a bug review and spec check before each commit.
+
 ## Docs
 - [Product requirements](docs/PRD.md)
 - [Data model](docs/DATA_MODEL.md)
