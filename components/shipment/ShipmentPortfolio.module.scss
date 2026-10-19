@@ -1,0 +1,119 @@
+@use "@/styles/mixins" as *;
+
+.portfolio {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.heading {
+  font-size: var(--text-md);
+}
+
+// From md the table may be wider than the screen on a narrow tablet; it scrolls here, never the page.
+.scroll {
+  min-width: 0;
+
+  @include bp(md) {
+    overflow-x: auto;
+  }
+}
+
+// Below md: no header row, and each row is a card with the column name before each value.
+.table {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+
+  thead {
+    display: none;
+  }
+
+  tbody,
+  tr {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  tr {
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  td {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+    overflow-wrap: anywhere;
+
+    &::before {
+      content: attr(data-label);
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+    }
+  }
+
+  @include bp(md) {
+    display: table;
+
+    thead {
+      display: table-header-group;
+    }
+
+    tbody {
+      display: table-row-group;
+    }
+
+    tr {
+      display: table-row;
+      background: var(--color-surface);
+    }
+
+    th,
+    td {
+      display: table-cell;
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+    }
+
+    td::before {
+      content: none;
+    }
+  }
+}
+
+// The ref is the link to the detail page; tall enough to tap.
+.ref {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+}
+
+// On its own line under the ref: a table cell lays out inline otherwise.
+.sub {
+  display: block;
+  color: var(--color-text-muted);
+}
+
+.delivered {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+}

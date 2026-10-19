@@ -230,6 +230,7 @@ export type CustomerAlert = {
 | `filterInbox(items, filter)` | `InboxItem[]` | Exception type and origin site, both optional, order kept |
 | `responseLabel(e, now)` | `{ text, tone }` | "Overdue · escalated" past `respondBy`; "Respond within 8 min", amber under 10 min |
 | `approvedAlert(draft, severity, text, now)` | `CustomerAlert` | The message as ops edited it, `source: confirmed`; only built on approval |
+| `portfolioRows(list, names, now)` | `PortfolioRow[]` | F3 (`lib/portfolio.ts`). Every shipment in the persona's perimeter with the same view as the detail page (`toCustomerShipment`), customer, origin site, destination, and the current leg's mode and operator. Ordered like F4 (`byUrgency`): late, at risk, unknown, on time, delivered. A missing name falls back to its id |
 | `escalationAlerts(exceptions, approvedIds, now)` | `CustomerAlert[]` | PRD §6: an overdue exception whose action writes to the customer and whose draft isn't approved gives "We're aware of an issue with SHP-1043 and are working on it.", dated at `respondBy` |
 | `getCurrentLeg(s)` | `Leg \| undefined` | The latest leg with a completed milestone, or the next leg once all its milestones are done, so a skipped operator report doesn't hold it back. First leg before departure, last leg once delivered; `undefined` only without legs |
 | `findVisibleShipment(user, list, id)` | `Shipment \| undefined` | F5. The shipment with exactly this id, only if `canView`; one outside the perimeter is `undefined` like an unknown id, so the page never reveals that it exists |

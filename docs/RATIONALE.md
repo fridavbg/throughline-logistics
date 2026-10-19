@@ -51,13 +51,17 @@ inventing information. It's the first candidate for a next step.
   can't see either: both live only in the browser, so a server render couldn't filter by role
   or show a simulated event. Static parts (layout, headings) stay Server Components. In
   production, data and access control move to the server (see below).
-- The chosen persona is saved in sessionStorage (Zustand `persist`, only the persona id), so a
-  reload or a pasted link keeps it and closing the tab resets the demo. The server can't read
-  it, so the store is read back after the first render (`skipHydration`) and role pages show a
-  skeleton until then, instead of a hydration mismatch or an early redirect to the picker.
-- What ops does in the inbox (handled items, approved messages) lives in the store's memory
-  only: switching persona keeps it, so an approved message shows up for the customer, and a
-  reload starts the demo over. Only an approved message or *Resolve* stops the customer's
+- The demo state is saved in sessionStorage (Zustand `persist`): the persona id, what ops did
+  (handled items, approved messages) and the demo events triggered, but never shipments, which
+  are rebuilt from the event ids. A reload or a pasted link keeps it; closing the tab or
+  *Reset demo* starts over. The server can't read it, so the store is read back after the first
+  render (`skipHydration`) and role pages show a skeleton until then, instead of a hydration
+  mismatch, an early redirect to the picker, or a handled item flashing back.
+- At first only the persona was saved, so a reload gave a clean demo. Testing showed reviewers
+  reload and open links in new tabs, and losing an approved message looked like a bug; with
+  *Reset demo* (F6) the clean start no longer needs a reload.
+- Switching persona keeps what ops did, so an approved message shows up for the customer. Only
+  an approved message or *Resolve* stops the customer's
   escalation acknowledgement; a snooze or a call to the operator doesn't tell the customer anything.
 - Shipment detail (`/shipments/[id]`) is one page per seed shipment, built at deploy time
   (`generateStaticParams`, `dynamicParams = false`), so the demo stays fully static and an

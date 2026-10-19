@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/AppShell";
+import { OpsNav } from "@/components/layout/OpsNav";
 import { RoleGate } from "@/components/layout/RoleGate";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
 import { AttentionInbox } from "@/components/shipment/AttentionInbox";
@@ -9,7 +10,7 @@ import { AttentionInbox } from "@/components/shipment/AttentionInbox";
  */
 export default function OpsHome() {
   return (
-    <AppShell title="Attention" actions={<RoleSwitcher />}>
+    <AppShell title="Attention" actions={<RoleSwitcher />} nav={<OpsNav />}>
       <RoleGate role="ops">
         <AttentionInbox />
       </RoleGate>

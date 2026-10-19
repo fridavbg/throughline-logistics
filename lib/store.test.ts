@@ -1,7 +1,8 @@
-// The demo store's own rules (F6): triggering an event and resetting the demo. Everything the
-// views show is derived from the shipments, which data/demoEvents.test.ts covers.
+// The demo store's own rules (F6): triggering an event, resetting the demo, and what a reload
+// keeps. Everything the views show is derived from the shipments, which data/demoEvents.test.ts
+// covers.
 import { beforeEach, describe, expect, it } from "vitest";
-import { useDemoStore } from "@/lib/store";
+import { savedState, useDemoStore } from "@/lib/store";
 import type { CustomerAlert } from "@/lib/types";
 
 const store = useDemoStore.getState;
@@ -49,5 +50,29 @@ describe("resetDemo", () => {
       sentAlerts: [],
       userId: "user-rick",
     });
+  });
+});
+
+describe("savedState", () => {
+  it("saves the persona and what happened in the demo, so a reload keeps both", () => {
+    store().trigger("vessel-delayed");
+    store().send("SHP-1042-delay", alert);
+    expect(savedState(store())).toEqual({
+      userId: "user-rick",
+      handledIds: ["SHP-1042-delay"],
+      settledIds: ["SHP-1042-delay"],
+      sentAlerts: [alert],
+      triggeredEventIds: ["vessel-delayed"],
+    });
+  });
+
+  it("never saves hasHydrated, so every page load waits for the saved state again", () => {
+    expect(savedState(store())).not.toHaveProperty("hasHydrated");
+  });
+
+  it("saves the reset state after Reset demo, so a reload doesn't bring old actions back", () => {
+    store().handle("SHP-1045-stale");
+    store().resetDemo();
+    expect(savedState(store())).toMatchObject({ handledIds: [], triggeredEventIds: [] });
   });
 });

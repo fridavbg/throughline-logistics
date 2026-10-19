@@ -14,8 +14,9 @@ type DemoState = {
   /** The chosen persona's id, or null before anyone has picked one. */
   userId: string | null;
   /**
-   * False until the persona saved in this tab has been read back. Pages wait for it before
-   * redirecting, so a reload doesn't bounce a logged-in persona to the picker.
+   * False until the state saved in this tab has been read back. Pages wait for it before
+   * redirecting or listing anything, so a reload doesn't bounce a logged-in persona to the
+   * picker or flash a handled item back into the inbox.
    */
   hasHydrated: boolean;
   signIn: (userId: string) => void;
@@ -47,9 +48,10 @@ type DemoState = {
 };
 
 /**
- * The demo store. Only `userId` is saved, in sessionStorage: a reload or a pasted link keeps
- * the persona, and closing the tab resets the demo. What ops does in the inbox and the demo
- * events live in memory only, so switching persona keeps them but a reload starts the demo over.
+ * The demo store, saved in sessionStorage: a reload or a pasted link keeps the persona, what
+ * ops did and the demo events triggered; closing the tab or *Reset demo* starts over. Only ids
+ * and sent messages are saved, never shipments: those are rebuilt from the event ids, and an
+ * id that's no longer a demo event is skipped by `eventsFor`.
  */
 export const useDemoStore = create<DemoState>()(
   persist(
@@ -80,9 +82,11 @@ export const useDemoStore = create<DemoState>()(
       resetDemo: () => set({ triggeredEventIds: [], handledIds: [], settledIds: [], sentAlerts: [] }),
     }),
     {
-      name: "throughline-persona",
+      // Renamed from "throughline-persona" when it started holding more than the persona; an
+      // old saved persona is ignored, so that tab shows the picker once.
+      name: "throughline-demo",
       storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({ userId: state.userId }),
+      partialize: savedState,
       // The server has no sessionStorage, so it always renders "no persona". Reading it back
       // straight away would make the browser's first render differ from the server's (a
       // hydration mismatch), so StoreHydrator calls rehydrate() after the first render instead.
@@ -91,6 +95,15 @@ export const useDemoStore = create<DemoState>()(
     },
   ),
 );
+
+/**
+ * What survives a reload: the persona and what happened in the demo, but no actions and no
+ * `hasHydrated`, which must start false on every page load.
+ */
+export function savedState(state: DemoState) {
+  const { userId, handledIds, settledIds, sentAlerts, triggeredEventIds } = state;
+  return { userId, handledIds, settledIds, sentAlerts, triggeredEventIds };
+}
 
 /**
  * The logged-in persona, looked up in the seed data. Only the id is stored, so a saved id

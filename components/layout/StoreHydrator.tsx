@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { useDemoStore } from "@/lib/store";
 
 /**
- * Reads the persona saved in this tab back into the store, once, after the first render.
+ * Reads the demo state saved in this tab (persona, what ops did, demo events) back into the
+ * store, once, after the first render.
  * Mounted in the root layout. Renders nothing. See the note on `skipHydration` in lib/store.ts.
  */
 export function StoreHydrator() {

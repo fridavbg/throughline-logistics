@@ -15,6 +15,8 @@ export type EtaBlockProps = {
   audience: User["role"];
   /** Customs is holding the shipment: no release time is known, so no date is shown at all. */
   onHold: boolean;
+  /** A smaller date, for a table row instead of a card. */
+  compact?: boolean;
 };
 
 /**
@@ -23,7 +25,7 @@ export type EtaBlockProps = {
  * The ETA status badge sits in the row whose ETA it was judged from, so a lateness the AI
  * predicted carries the `AI` label and never reads as the operator's word.
  */
-export function EtaBlock({ operatorEta, eta, prediction, audience, onHold }: EtaBlockProps) {
+export function EtaBlock({ operatorEta, eta, prediction, audience, onHold, compact = false }: EtaBlockProps) {
   const badge = <EtaStatusBadge status={eta.status} audience={audience} />;
   if (onHold) {
     // Matches the AI summary: a date next to "ETA unknown" would contradict it.
@@ -41,7 +43,7 @@ export function EtaBlock({ operatorEta, eta, prediction, audience, onHold }: Eta
   return (
     <div className={styles.etaBlock}>
       <div className={styles.row}>
-        <span className={styles.date}>{formatDay(operatorEta.date)}</span>
+        <span className={compact ? styles.dateCompact : styles.date}>{formatDay(operatorEta.date)}</span>
         <SourceTag source={operatorEta.source} />
         {!fromAi && badge}
       </div>

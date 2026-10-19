@@ -104,8 +104,8 @@ export function messagesNewestFirst(s: Shipment): RawEventRef[] {
 }
 
 /**
- * What ops has done about an exception in this demo session. Only this session: nothing is
- * stored, so a reload starts every exception as `open` again (RATIONALE §2).
+ * What ops has done about an exception in this demo session. Saved for this tab, so it survives
+ * a reload; closing the tab or *Reset demo* starts every exception as `open` again (RATIONALE §2).
  */
 export type ExceptionOutcome = "open" | "followed_up" | "resolved" | "customer_notified";
 
