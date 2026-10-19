@@ -1,23 +1,23 @@
 /**
- * Operator emails. Reading free-form email is AI work (A1, unstructured), planned for #19
- * and outside the time budget, so the seed emails carry their reading already: the
- * milestone they report and how confident that reading is.
+ * Operator emails. The text is read by the simulated AI in `lib/ai/normalizeText.ts` (A1,
+ * unstructured): the step it reports, how confident that reading is, and why.
  */
+import { readEmail } from "@/lib/ai/normalizeText";
 import { parseOperatorTime } from "@/lib/normalize/parseTime";
-import type { MilestoneType, NormalizedEvent } from "@/lib/types";
+import type { NormalizedEvent } from "@/lib/types";
 
-/** An email from an operator, with its (precomputed) reading. */
+/** An email from an operator, as received. */
 export type OperatorEmail = {
   ref: string;
   operatorId: string;
   receivedAt: string;
   subject: string;
   body: string;
-  reading: { milestone: MilestoneType | null; confidence: number };
 };
 
-/** Turns an operator email into an event, keeping the full text for ops. */
+/** Turns an operator email into an event, keeping the full text and the reading's reason for ops. */
 export function normalizeEmail(email: OperatorEmail): NormalizedEvent {
+  const reading = readEmail(email.subject, email.body);
   return {
     shipmentId: email.ref,
     event: {
@@ -25,8 +25,9 @@ export function normalizeEmail(email: OperatorEmail): NormalizedEvent {
       receivedAt: parseOperatorTime(email.receivedAt, "Operator email"),
       channel: "email",
       original: `Subject: ${email.subject}\n${email.body}`,
-      normalizedTo: email.reading.milestone,
-      confidence: email.reading.confidence,
+      normalizedTo: reading.milestone,
+      confidence: reading.confidence,
+      readingNote: reading.note,
     },
   };
 }
